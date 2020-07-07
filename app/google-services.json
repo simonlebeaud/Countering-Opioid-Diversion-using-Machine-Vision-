@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "762650498571",
+    "firebase_url": "https://pilloid.firebaseio.com",
+    "project_id": "pilloid",
+    "storage_bucket": "pilloid.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:762650498571:android:2b5a530bc663c3bd4bd90e",
+        "android_client_info": {
+          "package_name": "com.pilldetectionapp.pilloid"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "762650498571-c4i5am93rp1ofelkshshr62m7nireb0f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwQVN9fJ90vsQORWnxqNFwSD50b_1ckaE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "762650498571-c4i5am93rp1ofelkshshr62m7nireb0f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
