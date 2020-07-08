@@ -157,19 +157,19 @@ public class FaceDetector {
             pos[0] = pos_mouth_left.getX();
             pos[1] = pos_mouth_left.getY();
             // We print a message in the LogCat (debugging)
-            Log.e("Mouth detection : left",pos_mouth_left.toString());
+            //Log.e("Mouth detection : left",pos_mouth_left.toString());
 
             pos[2] = pos_mouth_right.getX();
             pos[3] = pos_mouth_right.getY();
 
             // We print a message in the LogCat (debugging)
-            Log.e("Mouth detection : right",pos_mouth_right.toString());
+            //Log.e("Mouth detection : right",pos_mouth_right.toString());
 
             pos[4] = pos_mouth_bottom.getX();
             pos[5] = pos_mouth_bottom.getY();
 
             // We print a message in the LogCat (debugging)
-            Log.e("Mouth detection: bottom",pos_mouth_bottom.toString());
+            //Log.e("Mouth detection: bottom",pos_mouth_bottom.toString());
             setMouth_detected(true);
 
         } else setMouth_detected(false);

@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,12 +34,17 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Boolean counter_can_begin, pill_removed, good_finished;
     private int shown_time, tolerance;
 
+    private TextView message_view;
+
     Detector detector;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_camera);
+        setContentView(R.layout.activity_camera_land);
+
+        message_view = (TextView) findViewById(R.id.MessageView);
+
 
         cameraBridgeViewBase = (JavaCameraView)findViewById(R.id.CameraView);
         cameraBridgeViewBase.setCameraIndex(1);
@@ -169,6 +175,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         if (!step_one_finished){
             // put the text : " Please put the pill in front..."
+            message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible");
+
             if (pill_detected && hands_detected) {
                 this.frame_text_detection.add(this.frame);
                 shown_time +=1;
@@ -184,7 +192,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
         } else if (!step_two_finished){
             // Put the text : " Please put the pill on your tongue,..."
-            
+            message_view.setText("Please put the pill on your tongue, and then remove your hands");
+
             if ((pill_detected)&&(!hands_detected)){
                 shown_time += 1;
                 // Debugging Text
