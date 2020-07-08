@@ -61,21 +61,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         System.gc();
+        Mat tframe;
         counter +=1;
         frame = inputFrame.rgba();
         //frameT = frame_.t();
         //Core.flip(frame_.t(), frameT, -1);
         //Imgproc.resize(frameT, frameT, frame_.size());
 
-        if (counter % 15 == 0) {
+        if (counter % 20 == 0) {
+
             Log.e("Frame took", "frame picked");
             this.detector.getFaceDetector().StartFaceDetection(frame);
+            Log.e("Pill ",this.detector.getFaceDetector().getMouth_detected().toString());
+            if (this.detector.getFaceDetector().getMouth_detected()) {
+                tframe = this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
+                return tframe;
+            } else return null;
 
-
-        }
-        frame = this.detector.getPillDetector().StartPillDetection(frame);
-
-        return frame;
+        } else return null;
     }
 
 

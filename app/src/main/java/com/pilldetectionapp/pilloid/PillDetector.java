@@ -1,7 +1,10 @@
 package com.pilldetectionapp.pilloid;
 
+import android.util.Log;
+
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
@@ -35,20 +38,34 @@ public class PillDetector {
     }
 
     // Methods
-    public Mat StartPillDetection(Mat frame){
+    public Mat StartPillDetection(Mat frame, int[] mouth) {
+
         Mat hsv_image = new Mat();
-        Mat mask = new Mat();
+        Mat black_White_image = new Mat();
+
+        // We transform the RGB image to the HSV image format
         Imgproc.cvtColor(frame, hsv_image, Imgproc.COLOR_BGR2HSV);
 
         // We create our range of white
         Scalar light_white = new Scalar(0, 0, 200);
         Scalar dark_white = new Scalar(145, 30, 255);
 
-        // We apply the filter to our HSV image, we get a filter image
-        Core.inRange(hsv_image, light_white,dark_white, mask);
+        // We apply the filter to our HSV image, we get a filter image (black and white)
+        Core.inRange(hsv_image, light_white, dark_white, black_White_image);
 
-        //Mat result = Core.bitwise_and(frame, frame, mask=mask);
-        return mask;
 
+        // We create a rectangle with the mouth position
+        Rect roi = new Rect(mouth[0], mouth[1], mouth[2], mouth[3]);
+
+        // We crop the image, we just want to analyse mouth area
+        Mat reshape_frame = new Mat(black_White_image, roi);
+
+        // We count number of white pixels into the mouth area
+        int result = Core.countNonZero(reshape_frame);
+
+        // Debugging message
+        Log.e("Pill detection", String.valueOf(result));
+
+        return black_White_image;
     }
 }

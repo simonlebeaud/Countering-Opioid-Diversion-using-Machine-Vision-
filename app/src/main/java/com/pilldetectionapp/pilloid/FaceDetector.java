@@ -25,8 +25,10 @@ public class FaceDetector {
     // Attributes
     private int nb_faces_detected;
     private Boolean face_detected;
-    private float[] mouth_position;
 
+    private Boolean mouth_detected;
+    // x, y , width, height
+    private int[] mouth_position;
     private FirebaseVisionFaceDetectorOptions settings;
 
     private FirebaseVisionFaceDetector face_detector;
@@ -35,7 +37,8 @@ public class FaceDetector {
     public FaceDetector(){
         this.nb_faces_detected = 0;
         this.face_detected = false;
-        this.mouth_position = new float[4];
+        this.mouth_position = new int[4];
+        this.mouth_detected = false;
 
         // Creation of the setting of the detector, see the documentation if you want more details
         this.settings =
@@ -58,9 +61,11 @@ public class FaceDetector {
         return this.face_detected;
     }
 
-    public float[] getMouth_Position(){
+    public int[] getMouth_Position(){
         return this.mouth_position;
     }
+
+    public Boolean getMouth_detected() { return this.mouth_detected; }
 
     //Setters
     public void setNb_Faces_Detected(int nb){
@@ -71,8 +76,12 @@ public class FaceDetector {
         this.face_detected = result;
     }
 
-    public void setMouth_Position(float[] position){
+    public void setMouth_Position(int[] position){
         this.mouth_position = position;
+    }
+
+    public void setMouth_detected(Boolean result){
+        this.mouth_detected = result;
     }
 
 
@@ -132,30 +141,49 @@ public class FaceDetector {
     }
 
     public void Get_SetMouthPositionFromFirebaseVisionFace (FirebaseVisionFace face){
-        float[] pos = new float[4];
+        float[] pos = new float[6];
+        int[] result = new int[4];
         FirebaseVisionFaceLandmark mouth_left = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_LEFT);
         FirebaseVisionFaceLandmark mouth_right = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_RIGHT);
-        FirebaseVisionPoint pos_mouth_right, pos_mouth_left;
+        FirebaseVisionFaceLandmark mouth_bottom = face.getLandmark(FirebaseVisionFaceLandmark.MOUTH_BOTTOM);
+
+        FirebaseVisionPoint pos_mouth_right, pos_mouth_left, pos_mouth_bottom;
         pos_mouth_left = mouth_left.getPosition();
         pos_mouth_right = mouth_right.getPosition();
+        pos_mouth_bottom = mouth_bottom.getPosition();
 
-        if (pos_mouth_left != null) {
+
+        if ((pos_mouth_right != null)&&(pos_mouth_bottom != null)&&(pos_mouth_left != null)){
             pos[0] = pos_mouth_left.getX();
             pos[1] = pos_mouth_left.getY();
-
             // We print a message in the LogCat (debugging)
             Log.e("Mouth detection : left",pos_mouth_left.toString());
-        }
 
-        if (pos_mouth_right != null){
             pos[2] = pos_mouth_right.getX();
             pos[3] = pos_mouth_right.getY();
 
             // We print a message in the LogCat (debugging)
             Log.e("Mouth detection : right",pos_mouth_right.toString());
-        }
 
-        this.setMouth_Position(pos);
+            pos[4] = pos_mouth_bottom.getX();
+            pos[5] = pos_mouth_bottom.getY();
+
+            // We print a message in the LogCat (debugging)
+            Log.e("Mouth detection: bottom",pos_mouth_bottom.toString());
+            setMouth_detected(true);
+
+        } else setMouth_detected(false);
+
+        Log.e("Pill ",getMouth_detected().toString());
+
+        // X and Y position of right top mouth ( * tolerance )
+        result[0] = (int) ((pos[0])*0.95);
+        result[1] = (int ) (pos[1]*0.95);
+
+        // width and height of the mouth
+        result[2] = (int) ((pos[2] - pos[0])*1.05);
+        result[3] = (int) ((pos[5] - pos[1])*1.05);
+        this.setMouth_Position(result);
 
 
 
