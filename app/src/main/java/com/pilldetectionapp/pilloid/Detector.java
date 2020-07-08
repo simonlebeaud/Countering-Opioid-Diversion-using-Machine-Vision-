@@ -20,7 +20,7 @@ public class Detector {
     }
 
     public TextDetector getTextDetector(){
-        return this.getTextDetector();
+        return this.textDetector;
     }
 
     public PillDetector getPillDetector(){

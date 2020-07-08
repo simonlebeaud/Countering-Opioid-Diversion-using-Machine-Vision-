@@ -66,6 +66,12 @@ public class PillDetector {
         // Debugging message
         Log.e("Pill detection", String.valueOf(result));
 
+
+        if ((result > 100)&&(result < 500)) {
+            setPill_detected(true);
+        } else setPill_detected(false);
+
+
         return black_White_image;
     }
 }

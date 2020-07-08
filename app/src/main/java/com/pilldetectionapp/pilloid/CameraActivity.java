@@ -16,13 +16,22 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
+import java.util.ArrayList;
+
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
     int counter = 0;
     private Mat frame, frameT;
-    Boolean FaceDetected ;
+
+    private ArrayList<Mat> frame_text_detection;
+
+    private Boolean mouth_detected,pill_detected,face_detected, hands_detected;
+    private Boolean step_one_finished, step_two_finished, step_three_finished,
+            step_four_finished;
+    private Boolean counter_can_begin, pill_removed, good_finished;
+    private int shown_time, tolerance;
 
     Detector detector;
 
@@ -36,7 +45,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         cameraBridgeViewBase.setCvCameraViewListener(this);
 
-        detector = new Detector();
+        initialize_variable();
 
 
         //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
@@ -61,24 +70,30 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         System.gc();
-        Mat tframe;
+        Mat tframe = new Mat();
         counter +=1;
         frame = inputFrame.rgba();
         //frameT = frame_.t();
         //Core.flip(frame_.t(), frameT, -1);
         //Imgproc.resize(frameT, frameT, frame_.size());
 
-        if (counter % 20 == 0) {
+        if (counter % 30 == 0) {
 
             Log.e("Frame took", "frame picked");
             this.detector.getFaceDetector().StartFaceDetection(frame);
             Log.e("Pill ",this.detector.getFaceDetector().getMouth_detected().toString());
             if (this.detector.getFaceDetector().getMouth_detected()) {
                 tframe = this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
-                return tframe;
-            } else return null;
 
-        } else return null;
+                // Test the Text detection
+                if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
+
+            } else this.detector.getPillDetector().setPill_detected(false);
+
+            process_steps();
+
+        }
+        return frame;
     }
 
 
@@ -126,11 +141,115 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
-    public static Bitmap bitmapFromMat(Mat mRgba) {
-        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mRgba, bitmap);
+    private void initialize_variable(){
+        detector = new Detector();
+        frame_text_detection = new ArrayList<>();
 
-        return bitmap;
+        pill_detected = false;
+        mouth_detected = false;
+        face_detected = false;
+        hands_detected = false;
+        step_one_finished = false;
+        step_two_finished = false;
+        step_three_finished = false;
+        step_four_finished = false;
+        counter_can_begin = false;
+        pill_removed = false;
+        good_finished = false;
+        tolerance = 0;
+        shown_time = 0;
+    }
+
+    private void process_steps(){
+        pill_detected = this.detector.getPillDetector().getPill_detected();
+        mouth_detected = this.detector.getFaceDetector().getMouth_detected();
+        face_detected = this.detector.getFaceDetector().getFace_Detected();
+        // for the moment
+        hands_detected = true;
+
+        if (!step_one_finished){
+            // put the text : " Please put the pill in front..."
+            if (pill_detected && hands_detected) {
+                this.frame_text_detection.add(this.frame);
+                shown_time +=1;
+
+                // Debugging text
+                Log.e("Step one ",String.valueOf(shown_time));
+            }
+            if (shown_time > 4) {
+                step_one_finished = true;
+                shown_time = 0;
+            }
+
+
+        } else if (!step_two_finished){
+            // Put the text : " Please put the pill on your tongue,..."
+            
+            if ((pill_detected)&&(!hands_detected)){
+                shown_time += 1;
+                // Debugging Text
+                Log.e("Step Two" , String.valueOf(shown_time));
+                if (shown_time > 7){
+                    step_two_finished = true;
+                    shown_time = 0;
+                }
+            } else // Debugging Text
+                Log.e("Step Two" ," remove your hands");
+
+
+        } else if (!step_three_finished){
+            // Put the text : " Please keep the pill on your tongue for 10 seconds..."
+            if ((!pill_detected)&&(!hands_detected)&&(!counter_can_begin)){
+                counter_can_begin = true;
+            }
+
+            if (counter_can_begin){
+                // If there's hand in the frame during the ten seconds countdown,
+                // we assume the patient took the pill out of the mouth
+                if ((hands_detected)||(pill_detected)){
+                    counter_can_begin = false;
+                    pill_removed = true;
+                } else {
+                    shown_time += 1;
+                    if (shown_time > 15){
+                        step_three_finished = true;
+                        shown_time = 0;
+                    }
+                }
+            }
+
+
+        } else if (!step_four_finished){
+            // Put the text : " Please open your mouth and show..."
+            if ((pill_detected)&&(!hands_detected)){
+                shown_time += 1;
+                if (shown_time > 3) {
+                    step_four_finished = true;
+                }
+            }
+
+            // if we can't detect pill in the mouth,
+            // it may because the patient is opening his/her mouth and the pill is blocked
+            if (!pill_detected) tolerance += 1;
+
+            // if hands show up before the pill is detected,
+            // we assume the patient took out the pill
+            if (hands_detected) {
+                // the patient didn't follow all the instructions
+                //detection is finished
+                step_four_finished = true;
+                good_finished = false;
+            }
+
+            if (tolerance > 5){
+                // the patient didn't follow all the instructions
+                // detection is finished
+                step_four_finished = true;
+                good_finished = false;
+
+            }
+        }
+
     }
 
 }
