@@ -79,29 +79,27 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         System.gc();
-        Mat tframe = new Mat();
-        counter +=1;
         frame = inputFrame.rgba();
-        //frameT = frame_.t();
-        //Core.flip(frame_.t(), frameT, -1);
-        //Imgproc.resize(frameT, frameT, frame_.size());
+
+
 
         if (counter % 30 == 0) {
-
+            
             Log.e("Frame took", "frame picked");
             this.detector.getFaceDetector().StartFaceDetection(frame);
-            Log.e("Pill ",this.detector.getFaceDetector().getMouth_detected().toString());
+            Log.e("Mouth detected ",this.detector.getFaceDetector().getMouth_detected().toString());
             if (this.detector.getFaceDetector().getMouth_detected()) {
-                tframe = this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
+                this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 
                 // Test the Text detection
-                if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
+                //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
 
             } else this.detector.getPillDetector().setPill_detected(false);
 
             process_steps();
 
         }
+        counter +=1;
         return frame;
     }
 

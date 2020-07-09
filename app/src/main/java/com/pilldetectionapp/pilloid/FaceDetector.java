@@ -115,10 +115,12 @@ public class FaceDetector {
                                             // We print in the logCat that we have detected one face
                                             Log.e("Face Detector", "Detected");
 
-                                            // We set the mouth position only for the first face detected
-                                            if (count == 1) Get_SetMouthPositionFromFirebaseVisionFace(face);
                                         }
 
+                                        // We set the mouth position only for the first face detected
+                                        if (count == 1) {
+                                            Get_SetMouthPositionFromFirebaseVisionFace(faces.get(0));
+                                        } else setMouth_detected(false);
                                         // We set the number of detected faces
                                         setNb_Faces_Detected(count);
                                     }
