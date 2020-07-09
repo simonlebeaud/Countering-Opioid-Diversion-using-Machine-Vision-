@@ -1,6 +1,7 @@
 package com.pilldetectionapp.pilloid;
 
 
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,11 +31,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private Boolean mouth_detected,pill_detected,face_detected, hands_detected;
     private Boolean step_one_finished, step_two_finished, step_three_finished,
-            step_four_finished;
+            step_four_finished, detection_finished;
     private Boolean counter_can_begin, pill_removed, good_finished;
     private int shown_time, tolerance;
 
     private TextView message_view;
+
+    private String pill_text;
 
     Detector detector;
 
@@ -155,15 +158,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mouth_detected = false;
         face_detected = false;
         hands_detected = false;
+
         step_one_finished = false;
         step_two_finished = false;
         step_three_finished = false;
         step_four_finished = false;
+        detection_finished = false;
+
         counter_can_begin = false;
         pill_removed = false;
         good_finished = false;
         tolerance = 0;
         shown_time = 0;
+
+        Intent intent = getIntent();
+        pill_text = intent.getStringExtra(GetTextActivity.EXTRA_TEXT);
+
+        // Just to verify if it works
+        Log.e("text",pill_text);
     }
 
     private void process_steps(){
@@ -171,94 +183,113 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         mouth_detected = this.detector.getFaceDetector().getMouth_detected();
         face_detected = this.detector.getFaceDetector().getFace_Detected();
         // for the moment
-        hands_detected = true;
 
-        if (!step_one_finished){
-            // put the text : " Please put the pill in front..."
-            message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible");
+        if (!detection_finished) {
+            if (!step_one_finished) {
+                hands_detected = true;
+                // put the text : " Please put the pill in front..."
+                message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible");
+                if (pill_detected && hands_detected) {
+                    this.frame_text_detection.add(this.frame);
+                    shown_time += 1;
 
-            if (pill_detected && hands_detected) {
-                this.frame_text_detection.add(this.frame);
-                shown_time +=1;
-
-                // Debugging text
-                Log.e("Step one ",String.valueOf(shown_time));
-            }
-            if (shown_time > 4) {
-                step_one_finished = true;
-                shown_time = 0;
-            }
-
-
-        } else if (!step_two_finished){
-            // Put the text : " Please put the pill on your tongue,..."
-            message_view.setText("Please put the pill on your tongue, and then remove your hands");
-
-            if ((pill_detected)&&(!hands_detected)){
-                shown_time += 1;
-                // Debugging Text
-                Log.e("Step Two" , String.valueOf(shown_time));
-                if (shown_time > 7){
-                    step_two_finished = true;
+                    // Debugging text
+                    Log.e("Step one ", String.valueOf(shown_time));
+                }
+                if (shown_time > 4) {
+                    step_one_finished = true;
                     shown_time = 0;
                 }
-            } else // Debugging Text
-                Log.e("Step Two" ," remove your hands");
 
 
-        } else if (!step_three_finished){
-            // Put the text : " Please keep the pill on your tongue for 10 seconds..."
-            if ((!pill_detected)&&(!hands_detected)&&(!counter_can_begin)){
-                counter_can_begin = true;
-            }
+            } else if (!step_two_finished) {
+                hands_detected = false;
+                // Put the text : " Please put the pill on your tongue,..."
+                message_view.setText("Please put the pill on your tongue, and then remove your hands");
 
-            if (counter_can_begin){
-                // If there's hand in the frame during the ten seconds countdown,
-                // we assume the patient took the pill out of the mouth
-                if ((hands_detected)||(pill_detected)){
-                    counter_can_begin = false;
-                    pill_removed = true;
-                } else {
+
+                if ((pill_detected) && (!hands_detected)) {
                     shown_time += 1;
-                    if (shown_time > 15){
-                        step_three_finished = true;
+                    // Debugging Text
+                    Log.e("Step Two", String.valueOf(shown_time));
+                    if (shown_time > 7) {
+                        step_two_finished = true;
                         shown_time = 0;
+                        hands_detected = false;
+                    }
+                } else // Debugging Text
+                    Log.e("Step Two", " remove your hands");
+
+
+            } else if (!step_three_finished) {
+                // Put the text : " Please keep the pill on your tongue for 10 seconds..."
+                message_view.setText("Please keep the pill on your tongue 10 seconds, with your mouth close." + String.valueOf(shown_time));
+                if ((!pill_detected) && (!hands_detected) && (!counter_can_begin)) {
+                    counter_can_begin = true;
+                    // We reset the counter
+                    shown_time = 0;
+                }
+
+                Log.e("Counter can begin", counter_can_begin.toString());
+
+                if (counter_can_begin) {
+                    // If there's hand in the frame during the ten seconds countdown,
+                    // we assume the patient took the pill out of the mouth
+                    if ((hands_detected) || (pill_detected)) {
+                        counter_can_begin = false;
+                        pill_removed = true;
+                    } else {
+                        shown_time += 1;
+                        if (shown_time > 10) {
+                            step_three_finished = true;
+                            shown_time = 0;
+                        }
                     }
                 }
-            }
 
 
-        } else if (!step_four_finished){
-            // Put the text : " Please open your mouth and show..."
-            if ((pill_detected)&&(!hands_detected)){
-                shown_time += 1;
-                if (shown_time > 3) {
+            } else if (!step_four_finished) {
+                hands_detected = false;
+                // Put the text : " Please open your mouth and show..."
+                message_view.setText("Please open your and show the pill still on your tongue" + String.valueOf(shown_time));
+                if ((pill_detected) && (!hands_detected)) {
+                    shown_time += 1;
+                    if (shown_time > 3) {
+                        step_four_finished = true;
+                        detection_finished = true;
+                    }
+                }
+
+                // if we can't detect pill in the mouth,
+                // it may because the patient is opening his/her mouth and the pill is blocked
+                if (!pill_detected) tolerance += 1;
+
+                // if hands show up before the pill is detected,
+                // we assume the patient took out the pill
+                if (hands_detected) {
+                    // the patient didn't follow all the instructions
+                    //detection is finished
                     step_four_finished = true;
+                    detection_finished = true;
+                    good_finished = false;
+                }
+
+                if (tolerance > 5) {
+                    // the patient didn't follow all the instructions
+                    // detection is finished
+                    step_four_finished = true;
+                    detection_finished = true;
+                    good_finished = false;
+
                 }
             }
 
-            // if we can't detect pill in the mouth,
-            // it may because the patient is opening his/her mouth and the pill is blocked
-            if (!pill_detected) tolerance += 1;
+        } else {
+            if (tolerance <= 5) {
+                message_view.setText("Thank you, you accomplished all the steps.");
+            } else message_view.setText("You didn't respect the rules. ");
 
-            // if hands show up before the pill is detected,
-            // we assume the patient took out the pill
-            if (hands_detected) {
-                // the patient didn't follow all the instructions
-                //detection is finished
-                step_four_finished = true;
-                good_finished = false;
-            }
-
-            if (tolerance > 5){
-                // the patient didn't follow all the instructions
-                // detection is finished
-                step_four_finished = true;
-                good_finished = false;
-
-            }
         }
-
     }
 
 }

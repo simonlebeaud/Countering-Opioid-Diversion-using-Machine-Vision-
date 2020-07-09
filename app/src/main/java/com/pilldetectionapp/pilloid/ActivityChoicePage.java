@@ -54,7 +54,7 @@ public class ActivityChoicePage extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 // WHen the user click on the the run_button we launch the detection activity
-                Intent intent = new Intent(ActivityChoicePage.this, CameraActivity.class);
+                Intent intent = new Intent(ActivityChoicePage.this, GetTextActivity.class);
                 startActivity(intent);
             }
         });

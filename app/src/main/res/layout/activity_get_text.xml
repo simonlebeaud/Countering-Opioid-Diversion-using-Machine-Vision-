@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".GetTextActivity">
+
+    <Button
+        android:id="@+id/ChangeActivity"
+        android:layout_width="256dp"
+        android:layout_height="131dp"
+        android:layout_marginBottom="90dp"
+        android:text="Validate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/MessageView"
+        android:layout_width="249dp"
+        android:layout_height="89dp"
+        android:layout_marginTop="112dp"
+        android:text="Please write the text written on your pill"
+        android:textSize="25dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.469"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/Edit"
+        android:layout_width="260dp"
+        android:layout_height="84dp"
+        android:gravity="center_horizontal"
+        android:text="Text"
+        android:textSize="40dp"
+        app:layout_constraintBottom_toTopOf="@+id/ChangeActivity"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/MessageView" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

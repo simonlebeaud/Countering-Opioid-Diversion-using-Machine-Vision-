@@ -28,14 +28,15 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
 
-    <Button
+
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/ReturnButton"
-        android:layout_width="227dp"
-        android:layout_height="109dp"
-        android:layout_marginEnd="80dp"
-        android:layout_marginBottom="68dp"
-        android:text="Go back"
+        android:layout_width="63dp"
+        android:layout_height="52dp"
+        android:clickable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@android:drawable/ic_menu_revert" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

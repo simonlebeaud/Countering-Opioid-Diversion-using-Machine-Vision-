@@ -27,7 +27,7 @@ import java.io.ByteArrayOutputStream;
 
 public class TakePhotoActivity extends AppCompatActivity {
     private ImageView my_image;
-    private Button Return_Button;
+    private com.google.android.material.floatingactionbutton.FloatingActionButton Return_Button;
 
     private int REQUEST_CODE_FOR_IMAGE = 1000;
 
@@ -116,7 +116,7 @@ public class TakePhotoActivity extends AppCompatActivity {
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(TakePhotoActivity.this, "Setting successed", Toast.LENGTH_SHORT).show();
                         // set button
-                        Return_Button=(Button)findViewById(R.id.ReturnButton);
+                        Return_Button=findViewById(R.id.ReturnButton);
                         Return_Button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
