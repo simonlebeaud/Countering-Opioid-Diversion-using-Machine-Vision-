@@ -39,6 +39,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private String pill_text;
 
+
     Detector detector;
 
     @Override
@@ -149,7 +150,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     private void initialize_variable(){
-        detector = new Detector();
+        detector = new Detector(this);
         frame_text_detection = new ArrayList<>();
 
         pill_detected = false;
