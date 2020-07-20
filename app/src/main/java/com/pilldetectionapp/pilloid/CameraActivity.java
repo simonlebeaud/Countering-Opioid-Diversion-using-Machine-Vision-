@@ -87,9 +87,17 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         if (counter % 30 == 0) {
             
             Log.e("Frame took", "frame picked");
+
+            // We process face detection on the frame
             this.detector.getFaceDetector().StartFaceDetection(frame);
             Log.e("Mouth detected ",this.detector.getFaceDetector().getMouth_detected().toString());
+
+            // We process hand detection on the frame
+            this.detector.getHandDetector().StartHandDetection(frame);
+            Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
+
             if (this.detector.getFaceDetector().getMouth_detected()) {
+                // If we detect a mouth we try to detect a pill on it
                 this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 
                 // Test the Text detection
@@ -181,13 +189,12 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         pill_detected = this.detector.getPillDetector().getPill_detected();
         mouth_detected = this.detector.getFaceDetector().getMouth_detected();
         face_detected = this.detector.getFaceDetector().getFace_Detected();
-        // for the moment
+        hands_detected = this.detector.getHandDetector().getHand_detected();
 
         if (!detection_finished) {
             if (!step_one_finished) {
-                hands_detected = true;
                 // put the text : " Please put the pill in front..."
-                message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible");
+                message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible  " + String.valueOf(4 - shown_time));
                 if (pill_detected && hands_detected) {
                     this.frame_text_detection.add(this.frame);
                     shown_time += 1;
@@ -202,7 +209,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
 
             } else if (!step_two_finished) {
-                hands_detected = false;
+
                 // Put the text : " Please put the pill on your tongue,..."
                 message_view.setText("Please put the pill on your tongue, and then remove your hands");
 
@@ -214,7 +221,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     if (shown_time > 7) {
                         step_two_finished = true;
                         shown_time = 0;
-                        hands_detected = false;
                     }
                 } else // Debugging Text
                     Log.e("Step Two", " remove your hands");
@@ -222,7 +228,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             } else if (!step_three_finished) {
                 // Put the text : " Please keep the pill on your tongue for 10 seconds..."
-                message_view.setText("Please keep the pill on your tongue 10 seconds, with your mouth close." + String.valueOf(shown_time));
+                message_view.setText("Please keep the pill on your tongue 10 seconds, with your mouth close." + String.valueOf(10 - shown_time));
                 if ((!pill_detected) && (!hands_detected) && (!counter_can_begin)) {
                     counter_can_begin = true;
                     // We reset the counter
@@ -248,9 +254,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
 
             } else if (!step_four_finished) {
-                hands_detected = false;
                 // Put the text : " Please open your mouth and show..."
-                message_view.setText("Please open your and show the pill still on your tongue" + String.valueOf(shown_time));
+                message_view.setText("Please open your and show the pill still on your tongue" + String.valueOf(3 - shown_time));
                 if ((pill_detected) && (!hands_detected)) {
                     shown_time += 1;
                     if (shown_time > 3) {

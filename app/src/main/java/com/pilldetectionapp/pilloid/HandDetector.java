@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.graphics.RectF;
 import android.os.Trace;
 import android.util.Log;
@@ -68,6 +69,9 @@ public class HandDetector {
     // numDetections: array of shape [Batchsize]
     // contains the number of detected boxes
     private float[] numDetections;
+    private static final int INPUT_SIZE = 256;
+
+    private Boolean hand_detected;
 
 
     public HandDetector(Activity activity ,
@@ -76,7 +80,7 @@ public class HandDetector {
                         final String labelFilename,
                         final int inputSize,
                         final boolean isQuantized) throws IOException{
-
+        this.hand_detected = false;
         this.activity = activity;
         this.inputSize = inputSize;
         this.assetManager = assetManager;
@@ -145,8 +149,17 @@ public class HandDetector {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
+    public Boolean getHand_detected(){
+        return this.hand_detected;
+    }
 
-    public Boolean recognizeImage(Bitmap bitmap, Bitmap oribmp) {
+
+    public void StartHandDetection(Mat frame) {
+
+        Bitmap oribmp = bitmapFromMat(frame);
+        Bitmap bitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888);
+
+        bitmap = getResizedBitmap(oribmp, 256, 256);
         // Log this method so that it can be analyzed with systrace.
         Trace.beginSection("recognizeImage");
 
@@ -217,15 +230,34 @@ public class HandDetector {
 
             if (x > 0.97f) {
                 count++;
-            }
+                }
         }
         if (count != 0) {
-            return true;
-        } else {
-            return false;
-        }
+            this.hand_detected = true;
+        } else this.hand_detected = false;
+    }
 
+    public Bitmap bitmapFromMat(Mat mRgba) {
+        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mRgba, bitmap);
+        return bitmap;
+    }
 
+    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
+        int width = bm.getWidth();
+        int height = bm.getHeight();
+        float scaleWidth = ((float) newWidth) / width;
+        float scaleHeight = ((float) newHeight) / height;
+        // CREATE A MATRIX FOR THE MANIPULATION
+        Matrix matrix = new Matrix();
+        // RESIZE THE BIT MAP
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        // "RECREATE" THE NEW BITMAP
+        Bitmap resizedBitmap = Bitmap.createBitmap(
+                bm, 0, 0, width, height, matrix, false);
+        bm.recycle();
+        return resizedBitmap;
     }
 
 }

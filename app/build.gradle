@@ -3,6 +3,10 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.gms.google-services'
 
 android {
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
     compileSdkVersion 30
     buildToolsVersion "30.0.0"
     ndkVersion "21.3.6528147"
