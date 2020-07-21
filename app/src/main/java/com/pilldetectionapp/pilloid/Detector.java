@@ -15,6 +15,7 @@ public class Detector {
     private TextDetector textDetector;
     private PillDetector pillDetector;
     private HandDetector handDetector;
+    private FaceRecognitionDetector faceRecognitionDetector;
 
     // Constants for the handdetector
     private static final int INPUT_SIZE = 256;
@@ -29,6 +30,7 @@ public class Detector {
         this.faceDetector = new FaceDetector();
         this.textDetector = new TextDetector();
         this.pillDetector = new PillDetector();
+        this.faceRecognitionDetector = new FaceRecognitionDetector(activity);
         try {
             this.handDetector = new HandDetector(activity,
                     activity.getAssets(),
@@ -58,5 +60,7 @@ public class Detector {
     public HandDetector getHandDetector(){
         return this.handDetector;
     }
+
+    public FaceRecognitionDetector getFaceRecognitionDetector() { return this.faceRecognitionDetector; }
 
 }

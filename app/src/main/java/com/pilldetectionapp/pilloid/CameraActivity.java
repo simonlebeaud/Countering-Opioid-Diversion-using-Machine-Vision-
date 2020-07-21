@@ -3,12 +3,14 @@ package com.pilldetectionapp.pilloid;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -33,11 +35,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Boolean step_one_finished, step_two_finished, step_three_finished,
             step_four_finished, detection_finished;
     private Boolean counter_can_begin, pill_removed, good_finished;
+    private Boolean recognitionInProgress =false;
+    private Boolean recognitionFinished = false;
     private int shown_time, tolerance;
 
     private TextView message_view;
 
     private String pill_text;
+
+    private Boolean rightPerson;
 
 
     Detector detector;
@@ -77,12 +83,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         };
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         System.gc();
         frame = inputFrame.rgba();
 
-
+        this.checkPersonsFaceIdentity(frame);
 
         if (counter % 30 == 0) {
             
@@ -191,6 +198,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         face_detected = this.detector.getFaceDetector().getFace_Detected();
         hands_detected = this.detector.getHandDetector().getHand_detected();
 
+
+
         if (!detection_finished) {
             if (!step_one_finished) {
                 // put the text : " Please put the pill in front..."
@@ -233,7 +242,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     counter_can_begin = true;
                     // We reset the counter
                     shown_time = 0;
-                }
+                }else {
+                this.recognitionFinished = false;
+            }
 
                 Log.e("Counter can begin", counter_can_begin.toString());
 
@@ -293,6 +304,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 message_view.setText("Thank you, you accomplished all the steps.");
             } else message_view.setText("You didn't respect the rules. ");
 
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void checkPersonsFaceIdentity(Mat frame) {
+        if(!recognitionInProgress & !recognitionFinished) {
+            recognitionInProgress = true;
+            this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
+            recognitionInProgress = false;
+            if(rightPerson) {
+                this.recognitionFinished = true;
+            }else {
+                Toast.makeText(this, "This is not the right Person", Toast.LENGTH_SHORT).show();
+
+            }
         }
     }
 
