@@ -211,7 +211,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             } else if (!step_two_finished) {
 
                 // Put the text : " Please put the pill on your tongue,..."
-                message_view.setText("Please put the pill on your tongue, and then remove your hands");
+                message_view.setText("Please put the pill on your tongue, and then remove your hands " + String.valueOf(7 - shown_time));
 
 
                 if ((pill_detected) && (!hands_detected)) {
@@ -222,8 +222,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         step_two_finished = true;
                         shown_time = 0;
                     }
-                } else // Debugging Text
-                    Log.e("Step Two", " remove your hands");
+                } //else // Debugging Text
+                    //Toast.makeText(this,"remove your hands",Toast.LENGTH_SHORT);
 
 
             } else if (!step_three_finished) {
@@ -255,7 +255,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             } else if (!step_four_finished) {
                 // Put the text : " Please open your mouth and show..."
-                message_view.setText("Please open your and show the pill still on your tongue" + String.valueOf(3 - shown_time));
+                message_view.setText("Please open your and show the pill still on your tongue " + String.valueOf(3 - shown_time));
                 if ((pill_detected) && (!hands_detected)) {
                     shown_time += 1;
                     if (shown_time > 3) {
