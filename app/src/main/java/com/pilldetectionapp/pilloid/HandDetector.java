@@ -228,7 +228,7 @@ public class HandDetector {
 
             float x = 1 / Double.valueOf(1 + Math.exp(-outputClf[0][i][0])).floatValue();
 
-            if (x > 0.97f) {
+            if (x > 0.98f) {
                 count++;
                 }
         }

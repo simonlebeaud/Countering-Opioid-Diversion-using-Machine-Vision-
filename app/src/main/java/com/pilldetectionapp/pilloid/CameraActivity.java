@@ -246,9 +246,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         step_two_finished = true;
                         shown_time = 0;
                     }
-                } //else // Debugging Text
-                    //Toast.makeText(this,"remove your hands",Toast.LENGTH_SHORT);
-
+                }
 
             } else if (!step_three_finished) {
                 // Put the text : " Please keep the pill on your tongue for 10 seconds..."
@@ -257,9 +255,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     counter_can_begin = true;
                     // We reset the counter
                     shown_time = 0;
-                }else {
-                this.recognitionFinished = false;
-            }
+                }
 
                 Log.e("Counter can begin", counter_can_begin.toString());
 
@@ -269,6 +265,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     if ((hands_detected) || (pill_detected)) {
                         counter_can_begin = false;
                         pill_removed = true;
+
                     } else {
                         shown_time += 1;
                         if (shown_time > 10) {
@@ -327,13 +324,19 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         if(!recognitionInProgress && !recognitionFinished) {
             recognitionInProgress = true;
             this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
-            recognitionInProgress = false;
+            //recognitionInProgress = false;
             if(rightPerson) {
                 this.recognitionFinished = true;
             }else {
-                //Toast.makeText(this, "This is not the right Person", Toast.LENGTH_SHORT).show();
-
+                runOnUiThread(new Runnable() {
+                    public void run()
+                    {
+                        Toast.makeText(getApplicationContext(), "That's not the right person", Toast.LENGTH_LONG).show();
+                    }
+                });
+                this.recognitionFinished = true;
             }
+
         }
     }
 
