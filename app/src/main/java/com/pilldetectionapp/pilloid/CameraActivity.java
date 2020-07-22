@@ -89,7 +89,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         System.gc();
         frame = inputFrame.rgba();
 
-        this.checkPersonsFaceIdentity(frame);
 
         if (counter % 30 == 0) {
             
@@ -104,6 +103,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
             if (this.detector.getFaceDetector().getMouth_detected()) {
+                this.checkPersonsFaceIdentity(frame);
                 // If we detect a mouth we try to detect a pill on it
                 this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 
@@ -309,14 +309,14 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkPersonsFaceIdentity(Mat frame) {
-        if(!recognitionInProgress & !recognitionFinished) {
+        if(!recognitionInProgress && !recognitionFinished) {
             recognitionInProgress = true;
             this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
             recognitionInProgress = false;
             if(rightPerson) {
                 this.recognitionFinished = true;
             }else {
-                Toast.makeText(this, "This is not the right Person", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "This is not the right Person", Toast.LENGTH_SHORT).show();
 
             }
         }

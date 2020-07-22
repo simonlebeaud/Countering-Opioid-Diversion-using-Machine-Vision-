@@ -86,15 +86,13 @@ public class FaceRecognitionDetector {
         this.imageData = new HashMap<String, float[]>();
 
         if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED){
-            File imagesDir = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/images/simon");
-            final Bitmap refImage = BitmapFactory.decodeFile(imagesDir+"/image_simon.jpg");
 
             FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(bitmap);
             OnSuccessListener successListener = new OnSuccessListener<List<FirebaseVisionFace>>() {
                 @Override
                 public void onSuccess(List<FirebaseVisionFace> faces) {
                     if ( !faces.isEmpty() ) {
-                        imageData.put("simon", FaceRecognitionDetector.this.model.getFaceEmbedding( refImage , faces.get(0).getBoundingBox() , false ));
+                        imageData.put("simon", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , false ));
                         if(FaceRecognitionDetector.this.foundFace != null) {
                             float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, false);
                             double highestSimilarityScore = -1f;
@@ -112,11 +110,12 @@ public class FaceRecognitionDetector {
             };
 
             FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
-                    .setWidth(refImage.getWidth())
-                    .setHeight(refImage.getHeight())
-                    .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21 )
-                    .setRotation( FirebaseVisionImageMetadata.ROTATION_0)
+                    .setWidth(savedImage.getWidth())
+                    .setHeight(savedImage.getHeight())
+                    .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
+                    .setRotation(FirebaseVisionImageMetadata.ROTATION_90)
                     .build();
+
 
             face_detector.detectInImage(reference).addOnSuccessListener(successListener);
         }
