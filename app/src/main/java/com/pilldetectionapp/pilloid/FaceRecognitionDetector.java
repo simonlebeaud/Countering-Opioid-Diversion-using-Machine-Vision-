@@ -77,7 +77,7 @@ public class FaceRecognitionDetector {
         face_detector.detectInImage(inputImage).addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionFace>>() {
             @Override
             public void onSuccess(List<FirebaseVisionFace> faces) {
-                FaceRecognitionDetector.this.foundFace = faces.get(0).getBoundingBox();
+                    FaceRecognitionDetector.this.foundFace = faces.get(0).getBoundingBox();
             }
         });
 
@@ -92,17 +92,22 @@ public class FaceRecognitionDetector {
                 @Override
                 public void onSuccess(List<FirebaseVisionFace> faces) {
                     if ( !faces.isEmpty() ) {
-                        imageData.put("simon", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , false ));
+                        imageData.put("person", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , true ));
                         if(FaceRecognitionDetector.this.foundFace != null) {
-                            float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, false);
+                            float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, true);
                             double highestSimilarityScore = -1f;
                             String highestSimilarityScoreName = "";
-                            double p = cosineSimilarity(subject, Objects.requireNonNull(imageData.get("simon")));
-                            if ( p > highestSimilarityScore ) {
-                                highestSimilarityScore = p;
-                            }
-                            if (highestSimilarityScore>0.7f) {
-                                FaceRecognitionDetector.this.recogSucess = true;
+                            float[] person = imageData.get("person");
+                            if(person !=null){
+                                double p = cosineSimilarity(subject, person);
+                                if ( p > highestSimilarityScore ) {
+                                    highestSimilarityScore = p;
+                                    Log.e(TAG, String.valueOf(highestSimilarityScore));
+                                }
+                                if (highestSimilarityScore>0.7f) {
+                                    FaceRecognitionDetector.this.recogSucess = true;
+                                    Log.e(TAG, "recog success ");
+                                }
                             }
                         }
                     }
@@ -134,8 +139,8 @@ public class FaceRecognitionDetector {
             normS += source[k]*source[k];
             normT += target[k]*target[k];
         }
-        double eucledianDist = Math.sqrt(normS) * Math.sqrt(normT);
-        return dotProduct / eucledianDist;
+        double euclideanDist = Math.sqrt(normS) * Math.sqrt(normT);
+        return dotProduct / euclideanDist;
     }
 
 

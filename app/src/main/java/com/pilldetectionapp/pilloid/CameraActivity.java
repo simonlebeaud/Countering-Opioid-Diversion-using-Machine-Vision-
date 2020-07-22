@@ -112,7 +112,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             } else this.detector.getPillDetector().setPill_detected(false);
 
-            process_steps();
+            if (recognitionFinished){
+                process_steps();
+            }
 
         }
         counter +=1;
