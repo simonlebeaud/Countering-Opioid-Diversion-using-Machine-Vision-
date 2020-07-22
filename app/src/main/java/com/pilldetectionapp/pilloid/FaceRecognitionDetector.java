@@ -78,6 +78,7 @@ public class FaceRecognitionDetector {
             @Override
             public void onSuccess(List<FirebaseVisionFace> faces) {
                     FaceRecognitionDetector.this.foundFace = faces.get(0).getBoundingBox();
+                    Log.e(TAG,"face found on saved image");
             }
         });
 
@@ -92,6 +93,7 @@ public class FaceRecognitionDetector {
                 @Override
                 public void onSuccess(List<FirebaseVisionFace> faces) {
                     if ( !faces.isEmpty() ) {
+                        Log.e(TAG, "face found on new image");
                         imageData.put("person", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , true ));
                         if(FaceRecognitionDetector.this.foundFace != null) {
                             float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, true);
@@ -110,6 +112,8 @@ public class FaceRecognitionDetector {
                                 }
                             }
                         }
+                    }else{
+                        Log.e(TAG,"no face on new image");
                     }
                 }
             };
