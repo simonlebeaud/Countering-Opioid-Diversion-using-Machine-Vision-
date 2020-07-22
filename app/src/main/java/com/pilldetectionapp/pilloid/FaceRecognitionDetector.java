@@ -96,7 +96,7 @@ public class FaceRecognitionDetector {
                         Log.e(TAG, "face found on new image");
                         imageData.put("person", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , true ));
                         if(FaceRecognitionDetector.this.foundFace != null) {
-                            float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, true);
+                            float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, false);
                             double highestSimilarityScore = -1f;
                             String highestSimilarityScoreName = "";
                             float[] person = imageData.get("person");
