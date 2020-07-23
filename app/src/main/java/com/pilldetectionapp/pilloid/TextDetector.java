@@ -66,7 +66,7 @@ public class TextDetector {
 
                                     // We print a message in the LogCat (debugging)
                                     Log.e("Text detection ", getText(pos));
-                                    Log.e("Text detection Result ", getTextDetectionResult().toString());
+                                    Log.e("Text detection Result Text", getTextDetectionResult().toString());
 
                                 }
                             })

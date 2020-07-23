@@ -297,6 +297,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     shown_time += 1;
                     if (shown_time > 3) {
                         step_four_finished = true;
+                        good_finished = true;
                         detection_finished = true;
                     }
                 }
@@ -330,21 +331,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         } else {
             message_view.setText("Thank you, you accomplished all the steps.");
 
+            //debugging text
+            Log.e("Tolerance",String.valueOf(tolerance));
+
             if (!textDetection_finished) {
                 // We now process the Text detection
                 this.detector.getTextDetector().StartTextDetection(frame_for_text_detection, this.pill_text);
-
-                // We change the result to true if it's the right text (doesn't work for the moment)
-                if (this.detector.getTextDetector().getTextDetectionResult()) this.rightTextDetected = true;
                 this.textDetection_finished = true;
             } else {
+                // We change the result to true if it's the right text (doesn't work for the moment)
+                if (this.detector.getTextDetector().getTextDetectionResult()) this.rightTextDetected = true;
                 // We launch the result activity with all our results
                 Intent intent = new Intent(CameraActivity.this, ResultActivity.class);
                 intent.putExtra("StepOneResult",step_one_finished);
                 intent.putExtra("StepTwoResult",step_two_finished);
-                intent.putExtra("StepThreeResult",pill_removed);
+                intent.putExtra("StepThreeResult",!pill_removed);
                 intent.putExtra("StepFourResult",good_finished);
                 intent.putExtra("TextDetectionResult",rightTextDetected);
+                Log.e("Text detection Result ", rightTextDetected.toString());
                 // add verification result ...
                 startActivity(intent);
             }

@@ -6,70 +6,147 @@
     android:layout_height="match_parent"
     tools:context=".ResultActivity">
 
-    <TextView
-        android:id="@+id/Step_Three"
-        android:layout_width="179dp"
-        android:layout_height="56dp"
-        android:text="Step Three"
-        android:textSize="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.063"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.684" />
 
     <TextView
         android:id="@+id/textView2"
-        android:layout_width="192dp"
-        android:layout_height="56dp"
+        android:layout_width="222dp"
+        android:layout_height="72dp"
         android:gravity="center_horizontal"
         android:text="Result"
         android:textColor="#0C0C0C"
-        android:textSize="40dp"
+        android:textSize="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.499"
+        app:layout_constraintHorizontal_bias="0.455"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.107" />
+        app:layout_constraintVertical_bias="0.047" />
+
 
     <TextView
-        android:id="@+id/Step_One"
-        android:layout_width="178dp"
-        android:layout_height="57dp"
+        android:id="@+id/step_One"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
         android:text="Step One"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.064"
+        app:layout_constraintHorizontal_bias="0.025"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.309" />
+        app:layout_constraintVertical_bias="0.3" />
 
     <TextView
-        android:id="@+id/Step_Two"
-        android:layout_width="183dp"
+        android:id="@+id/step_Two"
+        android:layout_width="180dp"
         android:layout_height="50dp"
         android:text="Step Two"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.063"
+        app:layout_constraintHorizontal_bias="0.025"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.498" />
+        app:layout_constraintTop_toBottomOf="@+id/step_One"
+        app:layout_constraintVertical_bias="0.075" />
+
 
     <TextView
-        android:id="@+id/Step_Four"
-        android:layout_width="172dp"
-        android:layout_height="45dp"
+        android:id="@+id/step_Three"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:text="Step Three"
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.025"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/step_Two"
+        app:layout_constraintVertical_bias="0.075" />
+
+    <TextView
+        android:id="@+id/step_Four"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
         android:text="Step Four"
         android:textSize="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.062"
+        app:layout_constraintHorizontal_bias="0.025"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/step_Three"
+        app:layout_constraintVertical_bias="0.075" />
+
+    <TextView
+        android:id="@+id/step_One_result"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:text=""
+        android:textSize="30dp"
+        app:layout_constraintBottom_toTopOf="@+id/step_Two_result"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/step_One"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.855" />
+        app:layout_constraintVertical_bias="0.879" />
+
+    <TextView
+        android:id="@+id/step_Two_result"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:text=""
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/step_Two"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.481" />
+
+    <TextView
+        android:id="@+id/step_Three_result"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:text=""
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/step_Three"
+        app:layout_constraintTop_toBottomOf="@+id/step_Two_result"
+        app:layout_constraintVertical_bias="0.072" />
+
+    <TextView
+        android:id="@+id/step_Four_result"
+        android:layout_width="180dp"
+        android:layout_height="50dp"
+        android:text=""
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.05"
+        app:layout_constraintStart_toEndOf="@+id/step_Four"
+        app:layout_constraintTop_toBottomOf="@+id/step_Three_result"
+        app:layout_constraintVertical_bias="0.077" />
+
+    <TextView
+        android:id="@+id/TextDetection"
+        android:layout_width="146dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="108dp"
+        android:layout_marginEnd="180dp"
+        android:textSize="30dp"
+        android:text="Text detection"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/TextDetectionResult"
+        android:layout_width="107dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="108dp"
+        android:layout_marginEnd="56dp"
+        android:textSize="30dp"
+        android:text=""
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
