@@ -9,6 +9,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.widget.TextView;
@@ -31,19 +32,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
     int counter = 0;
-    private Mat frame, frameT;
+
+    private Mat frame;
+    private Mat[] frame_for_text_detection;
 
     private ArrayList<Mat> frame_text_detection;
 
     private Boolean mouth_detected,pill_detected,face_detected, hands_detected;
     private Boolean step_one_finished, step_two_finished, step_three_finished,
-            step_four_finished, detection_finished;
-    private Boolean counter_can_begin, pill_removed, good_finished;
-    private Boolean recognitionInProgress =false;
-    private Boolean recognitionFinished = false;
-    private int shown_time, tolerance;
+            step_four_finished, detection_finished, textDetection_finished;
+    private Boolean counter_can_begin, pill_removed, good_finished, rightTextDetected;
 
-    private TextView message_view;
+    private Boolean recognitionInProgress ;
+    private Boolean recognitionFinished ;
+
+    private int shown_time, tolerance;
+    private Toast toast;
+
+    private TextView message_view,counter_view;
 
     private String pill_text;
 
@@ -56,9 +62,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera_land);
-
-        message_view = (TextView) findViewById(R.id.MessageView);
-
 
         cameraBridgeViewBase = (JavaCameraView)findViewById(R.id.CameraView);
         cameraBridgeViewBase.setCameraIndex(1);
@@ -104,31 +107,24 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
 
         if (counter % 30 == 0) {
-            
-            Log.e("Frame took", "frame picked");
+            if (!detection_finished) {
+                Log.e("Frame took", "frame picked");
 
-            // We process face detection on the frame
-            this.detector.getFaceDetector().StartFaceDetection(frame);
-            Log.e("Mouth detected ",this.detector.getFaceDetector().getMouth_detected().toString());
+                // We process face detection on the frame
+                this.detector.getFaceDetector().StartFaceDetection(frame);
+                Log.e("Mouth detected ", this.detector.getFaceDetector().getMouth_detected().toString());
 
-            // We process hand detection on the frame
-            this.detector.getHandDetector().StartHandDetection(frame);
-            Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
+                // We process hand detection on the frame
+                this.detector.getHandDetector().StartHandDetection(frame);
+                Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
-            if (this.detector.getFaceDetector().getMouth_detected()) {
-                this.checkPersonsFaceIdentity(frame);
-                // If we detect a mouth we try to detect a pill on it
-                this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
-
-                // Test the Text detection
-                //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
-
-            } else this.detector.getPillDetector().setPill_detected(false);
-
-            if (recognitionFinished){
-                process_steps();
+                if (this.detector.getFaceDetector().getMouth_detected()) {
+                    //this.checkPersonsFaceIdentity(frame);
+                    // If we detect a mouth we try to detect a pill on it
+                    this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
+                } else this.detector.getPillDetector().setPill_detected(false);
             }
-
+            process_steps();
         }
         counter +=1;
         return frame;
@@ -180,31 +176,40 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     private void initialize_variable(){
-        detector = new Detector(this);
-        frame_text_detection = new ArrayList<>();
 
-        pill_detected = false;
-        mouth_detected = false;
-        face_detected = false;
-        hands_detected = false;
+        message_view = (TextView) findViewById(R.id.MessageView);
+        counter_view = (TextView) findViewById(R.id.CounterView);
 
-        step_one_finished = false;
-        step_two_finished = false;
-        step_three_finished = false;
-        step_four_finished = false;
-        detection_finished = false;
+        this.detector = new Detector(this);
+        this.frame_text_detection = new ArrayList<>();
 
-        counter_can_begin = false;
-        pill_removed = false;
-        good_finished = false;
-        tolerance = 0;
-        shown_time = 0;
+        this.pill_detected = false;
+        this.mouth_detected = false;
+        this.face_detected = false;
+        this.hands_detected = false;
+
+        this.step_one_finished = false;
+        this.step_two_finished = false;
+        this.step_three_finished = false;
+        this.step_four_finished = false;
+        this.detection_finished = false;
+        this.textDetection_finished = false;
+
+        this.counter_can_begin = false;
+        this.pill_removed = false;
+        this.good_finished = false;
+        this.rightTextDetected = false;
+        this.tolerance = 0;
+        this.shown_time = 0;
+
+        this.recognitionInProgress =false;
+        this.recognitionFinished = false;
 
         Intent intent = getIntent();
-        pill_text = intent.getStringExtra(GetTextActivity.EXTRA_TEXT);
+        this.pill_text = intent.getStringExtra(GetTextActivity.EXTRA_TEXT);
 
-        // Just to verify if it works
-        Log.e("text",pill_text);
+        this.frame_for_text_detection = new Mat[5];
+
     }
 
     private void process_steps(){
@@ -218,24 +223,23 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         if (!detection_finished) {
             if (!step_one_finished) {
                 // put the text : " Please put the pill in front..."
-                message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible  " + String.valueOf(4 - shown_time));
+                message_view.setText("Please, put the pill in front of your mouth, with the text clearly visible  " );
+                counter_view.setText(String.valueOf(4 - shown_time));
                 if (pill_detected && hands_detected) {
                     this.frame_text_detection.add(this.frame);
+                    frame_for_text_detection[shown_time] = frame;
                     shown_time += 1;
-
-                    // Debugging text
-                    Log.e("Step one ", String.valueOf(shown_time));
                 }
+
                 if (shown_time > 4) {
                     step_one_finished = true;
                     shown_time = 0;
                 }
-
-
             } else if (!step_two_finished) {
 
                 // Put the text : " Please put the pill on your tongue,..."
-                message_view.setText("Please put the pill on your tongue, and then remove your hands " + String.valueOf(7 - shown_time));
+                message_view.setText("Please put the pill on your tongue, and then remove your hands " );
+                counter_view.setText(String.valueOf(7 - shown_time));
 
 
                 if ((pill_detected) && (!hands_detected)) {
@@ -247,15 +251,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                         shown_time = 0;
                     }
                 }
+                if (hands_detected) ShowToast("Hand detected !");
+
 
             } else if (!step_three_finished) {
                 // Put the text : " Please keep the pill on your tongue for 10 seconds..."
-                message_view.setText("Please keep the pill on your tongue 10 seconds, with your mouth close." + String.valueOf(10 - shown_time));
+                message_view.setText("Please keep the pill on your tongue 10 seconds, with your mouth close." );
+                counter_view.setText(String.valueOf(10 - shown_time));
                 if ((!pill_detected) && (!hands_detected) && (!counter_can_begin)) {
                     counter_can_begin = true;
                     // We reset the counter
                     shown_time = 0;
                 }
+
+                if (hands_detected) ShowToast("Hand detected !");
+                if (pill_detected) ShowToast("Pill detected !");
 
                 Log.e("Counter can begin", counter_can_begin.toString());
 
@@ -263,7 +273,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     // If there's hand in the frame during the ten seconds countdown,
                     // we assume the patient took the pill out of the mouth
                     if ((hands_detected) || (pill_detected)) {
+                        // The countdown restarts
                         counter_can_begin = false;
+
+                        // We assume that the pill could have been removed
                         pill_removed = true;
 
                     } else {
@@ -278,7 +291,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
             } else if (!step_four_finished) {
                 // Put the text : " Please open your mouth and show..."
-                message_view.setText("Please open your and show the pill still on your tongue " + String.valueOf(3 - shown_time));
+                message_view.setText("Please open your and show the pill still on your tongue " );
+                counter_view.setText(String.valueOf(3 - shown_time));
                 if ((pill_detected) && (!hands_detected)) {
                     shown_time += 1;
                     if (shown_time > 3) {
@@ -289,7 +303,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                 // if we can't detect pill in the mouth,
                 // it may because the patient is opening his/her mouth and the pill is blocked
-                if (!pill_detected) tolerance += 1;
+                if (!pill_detected) {
+                    tolerance += 1;
+                    ShowToast("Please show the pill ");
+                }
 
                 // if hands show up before the pill is detected,
                 // we assume the patient took out the pill
@@ -299,6 +316,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     step_four_finished = true;
                     detection_finished = true;
                     good_finished = false;
+                    ShowToast("Hand detected !");
                 }
 
                 if (tolerance > 5) {
@@ -307,14 +325,29 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                     step_four_finished = true;
                     detection_finished = true;
                     good_finished = false;
-
                 }
             }
-
         } else {
-            if (tolerance <= 5) {
-                message_view.setText("Thank you, you accomplished all the steps.");
-            } else message_view.setText("You didn't respect the rules. ");
+            message_view.setText("Thank you, you accomplished all the steps.");
+
+            if (!textDetection_finished) {
+                // We now process the Text detection
+                this.detector.getTextDetector().StartTextDetection(frame_for_text_detection, this.pill_text);
+
+                // We change the result to true if it's the right text (doesn't work for the moment)
+                if (this.detector.getTextDetector().getTextDetectionResult()) this.rightTextDetected = true;
+                this.textDetection_finished = true;
+            } else {
+                // We launch the result activity with all our results
+                Intent intent = new Intent(CameraActivity.this, ResultActivity.class);
+                intent.putExtra("StepOneResult",step_one_finished);
+                intent.putExtra("StepTwoResult",step_two_finished);
+                intent.putExtra("StepThreeResult",pill_removed);
+                intent.putExtra("StepFourResult",good_finished);
+                intent.putExtra("TextDetectionResult",rightTextDetected);
+                // add verification result ...
+                startActivity(intent);
+            }
 
         }
     }
@@ -324,7 +357,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         if(!recognitionInProgress && !recognitionFinished) {
             recognitionInProgress = true;
             this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
-            //recognitionInProgress = false;
+            recognitionInProgress = false;
             if(rightPerson) {
                 this.recognitionFinished = true;
             }else {
@@ -336,8 +369,31 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 });
                 this.recognitionFinished = true;
             }
-
         }
+    }
+
+    public void ShowToast(final String text){
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                int toastDurationInMilliSeconds = 500;
+                CountDownTimer toastCountDown;
+                toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+                // Set the countdown to display the toast
+
+                toastCountDown = new CountDownTimer(toastDurationInMilliSeconds, 1000 /*Tick duration*/) {
+                    public void onTick(long millisUntilFinished) {
+                        toast.show();
+                    }
+                    public void onFinish() {
+                        toast.cancel();
+                    }
+                };
+                toast.show();
+                toastCountDown.start();
+
+            }
+        });
     }
 
 }

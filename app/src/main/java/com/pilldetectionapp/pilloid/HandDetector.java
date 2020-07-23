@@ -221,19 +221,21 @@ public class HandDetector {
         double max_suggestion = 0;
         int count = 0;
         int clf_max_idx = 0;
+        float x =0;
 
         // finding the best result of detecting hand
         for (int i = 0; i < outputClf[0].length; i++) {
             clf[i] = outputClf[0][i][0];
 
-            float x = 1 / Double.valueOf(1 + Math.exp(-outputClf[0][i][0])).floatValue();
+            x = 1 / Double.valueOf(1 + Math.exp(-outputClf[0][i][0])).floatValue();
 
             if (x > 0.98f) {
                 count++;
                 }
         }
-        if (count != 0) {
+        if (count > 2 ) {
             this.hand_detected = true;
+            Log.e("Hand proba",String.valueOf(x));
         } else this.hand_detected = false;
     }
 

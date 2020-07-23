@@ -67,7 +67,7 @@ public class PillDetector {
         Log.e("Pill detection", String.valueOf(result));
 
 
-        if ((result > 100)&&(result < 500)) {
+        if ((result > 100)&&(result < 900)) {
             setPill_detected(true);
         } else setPill_detected(false);
 

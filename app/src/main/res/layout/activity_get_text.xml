@@ -23,6 +23,7 @@
         android:layout_marginTop="112dp"
         android:text="Please write the text written on your pill"
         android:textSize="25dp"
+        android:textColor="#020304"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.469"
         app:layout_constraintStart_toStartOf="parent"

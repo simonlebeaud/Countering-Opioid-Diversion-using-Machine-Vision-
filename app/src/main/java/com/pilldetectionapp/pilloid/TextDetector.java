@@ -19,51 +19,66 @@ import org.opencv.core.Mat;
 public class TextDetector {
     // Attributes
 
-    private String text;
+    private String[] text = new String[5];
+    private Boolean textDetectionResult;
+    private int pos;
 
     // Constructor
     public TextDetector(){
-        this.text = "";
+        for(int i =0;i<5;i++){
+            this.text[i] = "";
+        }
+        this.textDetectionResult = false;
     }
 
     // Getters
-    public String getText(){
-        return this.text;
+    public String getText(int i){
+        return this.text[i];
     }
+
+    public Boolean getTextDetectionResult(){ return this.textDetectionResult;}
 
     // Setters
-    public void setText(String t){
-        this.text = t;
-    }
+    public void setText(int i, String t){this.text[i] = t;}
 
+    public void setTextDetectionResult(Boolean result){this.textDetectionResult = result;}
 
-    public void StartTextDetection(Mat frame) {
-        // Creation of the firebase image
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapFromMat(frame));
+    public void StartTextDetection(Mat[] frame, final String pillText) {
+        // We have only 5 frame with text
+        for (int i = 0; i<5; i++) {
+            this.pos = i;
+            // Creation of the firebase image
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapFromMat(frame[i]));
 
-        FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
-                .getOnDeviceTextRecognizer();
+            FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
+                    .getOnDeviceTextRecognizer();
 
-        Task<FirebaseVisionText> result =
-                detector.processImage(image)
-                        .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
-                            @Override
-                            public void onSuccess(FirebaseVisionText firebaseVisionText) {
-                                // Task completed successfully
-                                setText(firebaseVisionText.getText());
-                                // We print a message in the LogCat (debugging)
-                                Log.e("Text detection ", getText());
+            Task<FirebaseVisionText> result =
+                    detector.processImage(image)
+                            .addOnSuccessListener(new OnSuccessListener<FirebaseVisionText>() {
+                                @Override
+                                public void onSuccess(FirebaseVisionText firebaseVisionText) {
+                                    // Task completed successfully
+                                    setText(pos,firebaseVisionText.getText());
 
-                            }
-                        })
-                        .addOnFailureListener(
-                                new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        // Task failed with an exception
+                                    // if that's the good text we put the result to True
+                                    if (getText(pos).equals(pillText)) setTextDetectionResult(true);
 
-                                    }
-                                });
+                                    // We print a message in the LogCat (debugging)
+                                    Log.e("Text detection ", getText(pos));
+                                    Log.e("Text detection Result ", getTextDetectionResult().toString());
+
+                                }
+                            })
+                            .addOnFailureListener(
+                                    new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception e) {
+                                            // Task failed with an exception
+
+                                        }
+                                    });
+        }
 
     }
 

@@ -11,8 +11,8 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        tools:layout_editor_absoluteX="99dp"
-        tools:layout_editor_absoluteY="-46dp" />
+        tools:layout_editor_absoluteX="25dp"
+        tools:layout_editor_absoluteY="-42dp" />
 
     <TextView
         android:id="@+id/MessageView"
@@ -25,5 +25,19 @@
         app:layout_constraintStart_toStartOf="parent"
         tools:ignore="MissingConstraints"
         tools:layout_editor_absoluteY="28dp" />
+
+    <TextView
+        android:id="@+id/CounterView"
+        android:layout_width="111dp"
+        android:layout_height="61dp"
+        android:layout_marginTop="100dp"
+        android:gravity="center_horizontal"
+        android:text=""
+        android:textSize="25dp"
+        android:textColor="#020304"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.729"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
