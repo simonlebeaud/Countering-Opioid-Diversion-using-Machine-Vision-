@@ -33,15 +33,15 @@
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
             android:value="face" />
-
         <activity
             android:name=".CameraActivity"
             android:screenOrientation="landscape"
             ></activity>
-
-        <activity android:name=".TakePhotoActivity" />
+        <activity android:name=".TakePhotoActivity"
+            android:screenOrientation="landscape"></activity>
         <activity android:name=".ActivityChoicePage" />
-        <activity android:name=".GetTextActivity" />
+        <activity android:name=".GetTextActivity"
+            android:screenOrientation="landscape"></activity>
         <activity android:name=".FirstPageActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 public class TakePhotoActivity extends AppCompatActivity {
     private ImageView my_image;
     private com.google.android.material.floatingactionbutton.FloatingActionButton Return_Button;
+    private Toast toast;
 
     private int REQUEST_CODE_FOR_IMAGE = 1000;
 
@@ -36,6 +38,16 @@ public class TakePhotoActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_take_photo_activty);
         my_image = (ImageView) findViewById(R.id.imageView);
+        // set button
+        Return_Button=findViewById(R.id.ReturnButton);
+        Return_Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // WHen the user click on the the run_button we launch the detection activity
+                Intent intent = new Intent(TakePhotoActivity.this, ActivityChoicePage.class);
+                startActivity(intent);
+            }
+        });
 
     }
 
@@ -69,6 +81,7 @@ public class TakePhotoActivity extends AppCompatActivity {
 
     // Upload the image on the cloud
     private void uploadImage(Bitmap bitmap) {
+        ShowToast("Saving...");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         String uid = FirebaseAuth.getInstance().getUid();
@@ -114,17 +127,8 @@ public class TakePhotoActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(TakePhotoActivity.this, "Setting successed", Toast.LENGTH_SHORT).show();
-                        // set button
-                        Return_Button=findViewById(R.id.ReturnButton);
-                        Return_Button.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                // WHen the user click on the the run_button we launch the detection activity
-                                Intent intent = new Intent(TakePhotoActivity.this, ActivityChoicePage.class);
-                                startActivity(intent);
-                            }
-                        });
+                        Toast.makeText(TakePhotoActivity.this, "Saving successed", Toast.LENGTH_SHORT).show();
+
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -133,6 +137,30 @@ public class TakePhotoActivity extends AppCompatActivity {
                         Toast.makeText(TakePhotoActivity.this, "Profile Image Setting failed", Toast.LENGTH_SHORT).show();
                     }
                 });
+    }
+
+    public void ShowToast(final String text){
+        runOnUiThread(new Runnable() {
+            public void run()
+            {
+                int toastDurationInMilliSeconds = 2500;
+                CountDownTimer toastCountDown;
+                toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+                // Set the countdown to display the toast
+
+                toastCountDown = new CountDownTimer(toastDurationInMilliSeconds, 1000 /*Tick duration*/) {
+                    public void onTick(long millisUntilFinished) {
+                        toast.show();
+                    }
+                    public void onFinish() {
+                        toast.cancel();
+                    }
+                };
+                toast.show();
+                toastCountDown.start();
+
+            }
+        });
     }
 
 }
