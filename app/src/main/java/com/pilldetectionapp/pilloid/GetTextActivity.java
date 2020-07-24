@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -25,12 +26,20 @@ public class GetTextActivity extends AppCompatActivity {
         WrittenText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 text = WrittenText.getText().toString();
-                if (!text.equals("Text")){
+
+                if (!text.equals("")){
                     mybutton = (Button)findViewById(R.id.ChangeActivity);
                     mybutton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
+                            text = WrittenText.getText().toString();
+                            // Debugging text
+                            Log.e("Pill text",text);
                             Intent intent = new Intent(GetTextActivity.this, CameraActivity.class);
                             intent.putExtra(EXTRA_TEXT,text);
                             startActivity(intent);
@@ -38,10 +47,6 @@ public class GetTextActivity extends AppCompatActivity {
                     });
 
                 }
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
             }
 

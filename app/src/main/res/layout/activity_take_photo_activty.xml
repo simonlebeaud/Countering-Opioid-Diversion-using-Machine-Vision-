@@ -29,12 +29,14 @@
         tools:srcCompat="@tools:sample/avatars" />
 
 
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/ReturnButton"
-        android:layout_width="63dp"
-        android:layout_height="52dp"
+        android:layout_width="60dp"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom|right"
         android:clickable="true"
+        app:fabCustomSize="48dp"
+        app:backgroundTint="@color/colorGrey"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@android:drawable/ic_menu_revert" />
