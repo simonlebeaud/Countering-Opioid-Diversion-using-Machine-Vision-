@@ -20,12 +20,10 @@ public class FaceNetModel {
 
     private Interpreter interpreter;
 
-    private int imgSize = 160;
-
 
     public FaceNetModel(AssetManager assetManager) {
         try {
-            this.interpreter = new Interpreter(loadModelFile(assetManager, "facenet.tflite"));
+            this.interpreter = new Interpreter(loadModelFile(assetManager));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -34,10 +32,10 @@ public class FaceNetModel {
     }
 
     // Gets an face embedding using FaceNet
-    public float[] getFaceEmbedding( Bitmap image, Rect crop, Boolean preRotate) {
+    public float[] getFaceEmbedding( Bitmap image, Rect crop, float angle) {
         return runFaceNet(
                 convertBitmapToBuffer(
-                        cropRectFromBitmap( image , crop , preRotate )
+                        cropRectFromBitmap( image , crop , angle )
                 )
         )[0];
     }
@@ -53,9 +51,10 @@ public class FaceNetModel {
 
     // Resize the given bitmap and convert it to a ByteBuffer
     private ByteBuffer convertBitmapToBuffer(Bitmap image) {
-        ByteBuffer imageByteBuffer = ByteBuffer.allocateDirect( 1 * imgSize * imgSize * 3 * 4 );
+        int imgSize = 160;
+        ByteBuffer imageByteBuffer = ByteBuffer.allocateDirect(imgSize * imgSize * 3 * 4);
         imageByteBuffer.order( ByteOrder.nativeOrder() );
-        Bitmap resizedImage = Bitmap.createScaledBitmap(image, imgSize , imgSize, false);
+        Bitmap resizedImage = Bitmap.createScaledBitmap(image, imgSize, imgSize, false);
         for (int i = 0; i < imgSize; i++) {
             for (int j = 0; j < imgSize; j++) {
                 int pixelValue = resizedImage.getPixel(i, j);
@@ -67,9 +66,9 @@ public class FaceNetModel {
         return imageByteBuffer;
     }
 
-    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
-        AssetFileDescriptor fileDescriptor = null;
-        fileDescriptor = assets.openFd(modelFilename);
+    private static MappedByteBuffer loadModelFile(AssetManager assets) throws IOException {
+        AssetFileDescriptor fileDescriptor;
+        fileDescriptor = assets.openFd("facenet.tflite");
         FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
 
         FileChannel fileChannel = inputStream.getChannel();
@@ -81,10 +80,10 @@ public class FaceNetModel {
     }
 
     // Crop the given bitmap with the given rect.
-    private Bitmap cropRectFromBitmap(Bitmap source, Rect rect , Boolean preRotate ) {
-        Bitmap cropped = null;
-        if ( preRotate ) {
-            cropped = rotateBitmap( source, 90f );
+    private Bitmap cropRectFromBitmap(Bitmap source, Rect rect , float angle ) {
+        Bitmap cropped;
+        if ( angle != 0 ) {
+            cropped = rotateBitmap( source, angle );
         } else {
             cropped = Bitmap.createBitmap(source,
                     rect.left,

@@ -86,14 +86,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             }
         };
 
-        CameraManager manager = (CameraManager) this.getSystemService(Context.CAMERA_SERVICE);
-        try {
-            CameraCharacteristics characteristics = manager.getCameraCharacteristics("1");
-            int sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-            Log.e("CAMERA ACTIVITY", sensorOrientation + "esgfdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd");
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -102,9 +94,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         System.gc();
         frame = inputFrame.rgba();
 
-
         if (counter % 30 == 0) {
-            
+
+            this.checkPersonsFaceIdentity(frame);
+
             Log.e("Frame took", "frame picked");
 
             // We process face detection on the frame
@@ -116,7 +109,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
             if (this.detector.getFaceDetector().getMouth_detected()) {
-                this.checkPersonsFaceIdentity(frame);
+
                 // If we detect a mouth we try to detect a pill on it
                 this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 

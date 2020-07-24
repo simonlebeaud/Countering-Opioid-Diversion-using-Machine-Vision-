@@ -17,6 +17,7 @@ import androidx.annotation.RequiresApi;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.ml.vision.FirebaseVision;
@@ -31,12 +32,11 @@ import com.google.firebase.storage.StorageReference;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
-import java.io.File;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.concurrent.ExecutionException;
 
 public class FaceRecognitionDetector {
 
@@ -45,7 +45,7 @@ public class FaceRecognitionDetector {
 
     private Activity activity;
     private FaceNetModel model;
-    private Map<String,float[]> imageData;
+    private float[] imageData;
     private Rect foundFace = null;
     private boolean recogSucess = false;
     private Bitmap bitmap;
@@ -69,64 +69,60 @@ public class FaceRecognitionDetector {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public boolean analyse(Mat frame){
+    public boolean analyse(Mat frame) {
         this.bitmap = bitmapFromMat(frame);
 
-        FirebaseVisionImage inputImage = FirebaseVisionImage.fromBitmap(bitmap);
+        List<FirebaseVisionFace> facesInInput = null;
+        List<FirebaseVisionFace> facesInSaved = null;
 
-        face_detector.detectInImage(inputImage).addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionFace>>() {
-            @Override
-            public void onSuccess(List<FirebaseVisionFace> faces) {
-                    FaceRecognitionDetector.this.foundFace = faces.get(0).getBoundingBox();
-                    Log.e(TAG,"face found on saved image");
+        final FirebaseVisionImage inputImage = FirebaseVisionImage.fromBitmap(bitmap);
+
+        try {
+            facesInInput  = Tasks.await(face_detector.detectInImage(inputImage));
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (facesInInput != null && !facesInInput.isEmpty()) {
+            FaceRecognitionDetector.this.foundFace = facesInInput.get(0).getBoundingBox();
+            Log.e(TAG, "face found on saved image");
+            this.model = new FaceNetModel(activity.getAssets());
+
+            this.imageData = new float[128];
+
+            FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(savedImage);
+
+            try {
+                facesInSaved = Tasks.await(face_detector.detectInImage(reference));
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
             }
-        });
+            if ( !facesInSaved.isEmpty() ) {
+                Log.e(TAG, "face found on new image");
+                imageData = FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , facesInSaved.get(0).getBoundingBox() ,  90f);
 
-        this.model = new FaceNetModel(activity.getAssets());
+                if(FaceRecognitionDetector.this.foundFace != null) {
+                    float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, 90f);
+                    double highestSimilarityScore = -1f;
+                    String highestSimilarityScoreName = "";
 
-        this.imageData = new HashMap<String, float[]>();
+                    if(imageData !=null){
+                        double p = cosineSimilarity(subject, imageData);
 
-        if (activity.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE ) == PackageManager.PERMISSION_GRANTED){
-
-            FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(bitmap);
-            OnSuccessListener successListener = new OnSuccessListener<List<FirebaseVisionFace>>() {
-                @Override
-                public void onSuccess(List<FirebaseVisionFace> faces) {
-                    if ( !faces.isEmpty() ) {
-                        Log.e(TAG, "face found on new image");
-                        imageData.put("person", FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , faces.get(0).getBoundingBox() , true ));
-                        if(FaceRecognitionDetector.this.foundFace != null) {
-                            float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, false);
-                            double highestSimilarityScore = -1f;
-                            String highestSimilarityScoreName = "";
-                            float[] person = imageData.get("person");
-                            if(person !=null){
-                                double p = cosineSimilarity(subject, person);
-                                if ( p > highestSimilarityScore ) {
-                                    highestSimilarityScore = p;
-                                    Log.e(TAG, String.valueOf(highestSimilarityScore));
-                                }
-                                if (highestSimilarityScore>0.7f) {
-                                    FaceRecognitionDetector.this.recogSucess = true;
-                                    Log.e(TAG, "recog success ");
-                                }
-                            }
+                        if ( p > highestSimilarityScore ) {
+                            highestSimilarityScore = p;
+                            Log.e(TAG, String.valueOf(highestSimilarityScore));
                         }
-                    }else{
-                        Log.e(TAG,"no face on new image");
+
+                        if (highestSimilarityScore>0.7f) {
+                            FaceRecognitionDetector.this.recogSucess = true;
+                            Log.e(TAG, "recog success ");
+                        }
+
                     }
                 }
-            };
-
-            FirebaseVisionImageMetadata metadata = new FirebaseVisionImageMetadata.Builder()
-                    .setWidth(savedImage.getWidth())
-                    .setHeight(savedImage.getHeight())
-                    .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
-                    .setRotation(FirebaseVisionImageMetadata.ROTATION_90)
-                    .build();
-
-
-            face_detector.detectInImage(reference).addOnSuccessListener(successListener);
+            }else{
+                Log.e(TAG,"no face on new image");
+            }
         }
     return this.recogSucess;
     }
@@ -161,19 +157,17 @@ public class FaceRecognitionDetector {
         long ONE_MEGABYTE = 1024*1024;
         user = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        Uri uri = user.getPhotoUrl();
         StorageReference gsReference = storage.getReferenceFromUrl("gs://pilloid.appspot.com/profileImages/" + user.getUid() + ".jpeg");
         gsReference.getBytes(ONE_MEGABYTE)
                 .addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {
-                        savedImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                        FaceRecognitionDetector.this.savedImage = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(activity, "Couldn't download Image", Toast.LENGTH_SHORT);
                     Log.e(TAG, "onFailure : Error : " + e.getMessage());
                 }
                 });
