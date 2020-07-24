@@ -44,6 +44,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Boolean counter_can_begin, pill_removed, good_finished;
     private Boolean recognitionInProgress =false;
     private Boolean recognitionFinished = false;
+    private boolean textDetection_finished;
+    private boolean rightTextDetected;
     private int shown_time, tolerance;
     private Toast toast;
 
@@ -51,7 +53,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     private String pill_text;
 
-    private Boolean rightPerson;
+    private Boolean rightPerson = false;
 
 
     Detector detector;
@@ -96,10 +98,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         frame = inputFrame.rgba();
 
         if (counter % 30 == 0) {
-
-            this.checkPersonsFaceIdentity(frame);
-
-            Log.e("Frame took", "frame picked");
+            if( !rightPerson  ) {
+                this.checkPersonsFaceIdentity(frame);
+            } else {
+                Log.e("Frame took", "frame picked");
 
                 // We process face detection on the frame
                 this.detector.getFaceDetector().StartFaceDetection(frame);
@@ -109,20 +111,18 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 this.detector.getHandDetector().StartHandDetection(frame);
                 Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
-            if (this.detector.getFaceDetector().getMouth_detected()) {
+                if (this.detector.getFaceDetector().getMouth_detected()) {
 
-                // If we detect a mouth we try to detect a pill on it
-                this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
+                    // If we detect a mouth we try to detect a pill on it
+                    this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 
-                // Test the Text detection
-                //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
+                    // Test the Text detection
+                    //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
 
-            } else this.detector.getPillDetector().setPill_detected(false);
+                } else this.detector.getPillDetector().setPill_detected(false);
 
-            if (recognitionFinished){
                 process_steps();
             }
-
         }
         counter +=1;
         return frame;
@@ -346,7 +346,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 intent.putExtra("StepThreeResult",!pill_removed);
                 intent.putExtra("StepFourResult",good_finished);
                 intent.putExtra("TextDetectionResult",rightTextDetected);
-                Log.e("Text detection Result ", rightTextDetected.toString());
+                Log.e("Text detection Result ", String.valueOf(rightTextDetected));
                 // add verification result ...
                 startActivity(intent);
             }
@@ -356,20 +356,15 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkPersonsFaceIdentity(Mat frame) {
-        if(!recognitionInProgress && !recognitionFinished) {
-            recognitionInProgress = true;
+        if(!rightPerson) {
             this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
-            recognitionInProgress = false;
-            if(rightPerson) {
-                this.recognitionFinished = true;
-            }else {
+            if(!rightPerson) {
                 runOnUiThread(new Runnable() {
                     public void run()
                     {
                         Toast.makeText(getApplicationContext(), "That's not the right person", Toast.LENGTH_LONG).show();
                     }
                 });
-                this.recognitionFinished = true;
             }
         }
     }

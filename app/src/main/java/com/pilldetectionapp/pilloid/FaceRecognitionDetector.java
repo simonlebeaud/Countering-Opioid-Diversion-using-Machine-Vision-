@@ -47,7 +47,6 @@ public class FaceRecognitionDetector {
     private FaceNetModel model;
     private float[] imageData;
     private Rect foundFace = null;
-    private boolean recogSucess = false;
     private Bitmap bitmap;
     private Bitmap savedImage;
     private FirebaseUser user;
@@ -70,6 +69,8 @@ public class FaceRecognitionDetector {
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean analyse(Mat frame) {
+        boolean recogSucess = false;
+
         this.bitmap = bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
@@ -83,7 +84,7 @@ public class FaceRecognitionDetector {
             e.printStackTrace();
         }
         if (facesInInput != null && !facesInInput.isEmpty()) {
-            FaceRecognitionDetector.this.foundFace = facesInInput.get(0).getBoundingBox();
+            this.foundFace = facesInInput.get(0).getBoundingBox();
             Log.e(TAG, "face found on saved image");
             this.model = new FaceNetModel(activity.getAssets());
 
@@ -96,35 +97,32 @@ public class FaceRecognitionDetector {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-            if ( !facesInSaved.isEmpty() ) {
+            if (!facesInSaved.isEmpty()) {
                 Log.e(TAG, "face found on new image");
-                imageData = FaceRecognitionDetector.this.model.getFaceEmbedding( savedImage , facesInSaved.get(0).getBoundingBox() ,  90f);
+                imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 90f);
 
-                if(FaceRecognitionDetector.this.foundFace != null) {
-                    float[] subject = model.getFaceEmbedding(FaceRecognitionDetector.this.bitmap, FaceRecognitionDetector.this.foundFace, 90f);
+                if (FaceRecognitionDetector.this.foundFace != null) {
+                    float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 90f);
                     double highestSimilarityScore = -1f;
                     String highestSimilarityScoreName = "";
 
-                    if(imageData !=null){
-                        double p = cosineSimilarity(subject, imageData);
+                    if (imageData != null) {
+                        highestSimilarityScore = cosineSimilarity(subject, imageData);
 
-                        if ( p > highestSimilarityScore ) {
-                            highestSimilarityScore = p;
-                            Log.e(TAG, String.valueOf(highestSimilarityScore));
-                        }
+                        Log.e(TAG, String.valueOf(highestSimilarityScore));
 
-                        if (highestSimilarityScore>0.7f) {
-                            FaceRecognitionDetector.this.recogSucess = true;
+                        if (highestSimilarityScore > 0.7f) {
                             Log.e(TAG, "recog success ");
+                            recogSucess = true;
                         }
 
                     }
                 }
-            }else{
-                Log.e(TAG,"no face on new image");
+            } else {
+                Log.e(TAG, "no face on new image");
             }
         }
-    return this.recogSucess;
+        return recogSucess;
     }
 
     protected double cosineSimilarity(float[] source, float[] target) {
