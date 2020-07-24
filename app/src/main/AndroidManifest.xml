@@ -39,7 +39,9 @@
             android:screenOrientation="landscape"
             ></activity>
 
-        <activity android:name=".TakePhotoActivity" />
+        <activity android:name=".TakePhotoActivity"
+            android:screenOrientation="landscape"></activity>
+
         <activity android:name=".ActivityChoicePage" />
         <activity android:name=".GetTextActivity" />
         <activity android:name=".FirstPageActivity">

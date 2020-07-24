@@ -6,28 +6,28 @@
     android:layout_height="match_parent"
     tools:context=".TakePhotoActivity">
 
+
     <Button
-        android:onClick="takePhoto"
         android:id="@+id/PhotoButton"
         android:layout_width="227dp"
         android:layout_height="109dp"
-        android:layout_marginEnd="76dp"
-        android:layout_marginBottom="212dp"
+        android:layout_marginBottom="48dp"
+        android:onClick="takePhoto"
         android:text="Take Photo"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <ImageView
         android:id="@+id/imageView"
         android:layout_width="279dp"
         android:layout_height="193dp"
-        android:layout_marginTop="124dp"
-        android:layout_marginEnd="64dp"
+        android:layout_marginTop="16dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:srcCompat="@tools:sample/avatars" />
-
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/ReturnButton"
