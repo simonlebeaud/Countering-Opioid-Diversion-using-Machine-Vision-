@@ -7,26 +7,30 @@
     tools:context=".FirstPageActivity">
 
     <Button
-        android:onClick="StartAuthentication"
         android:id="@+id/loginButton"
-        android:layout_width="265dp"
+        android:layout_width="300dp"
         android:layout_height="116dp"
         android:layout_marginBottom="288dp"
+        android:onClick="StartAuthentication"
         android:text="Login"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintHorizontal_bias="0.378"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/TitleTextView"
+        app:layout_constraintVertical_bias="0.924" />
 
     <TextView
         android:id="@+id/TitleTextView"
-        android:layout_width="313dp"
-        android:layout_height="170dp"
-        android:layout_marginTop="124dp"
+        android:layout_width="300dp"
+        android:layout_height="125dp"
+        android:layout_marginTop="116dp"
+        android:gravity="center_horizontal"
         android:text="Opioid Detector"
         android:textColor="#020304"
         android:textSize="45dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.673"
+        app:layout_constraintHorizontal_bias="0.381"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

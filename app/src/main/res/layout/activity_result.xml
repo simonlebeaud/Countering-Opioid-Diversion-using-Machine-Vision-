@@ -130,12 +130,12 @@
 
     <TextView
         android:id="@+id/TextDetection"
-        android:layout_width="146dp"
-        android:layout_height="47dp"
+        android:layout_width="148dp"
+        android:layout_height="93dp"
         android:layout_marginTop="108dp"
         android:layout_marginEnd="180dp"
-        android:textSize="30dp"
         android:text="Text detection"
+        android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -143,10 +143,12 @@
         android:id="@+id/TextDetectionResult"
         android:layout_width="107dp"
         android:layout_height="45dp"
-        android:layout_marginTop="108dp"
+        android:layout_marginTop="128dp"
         android:layout_marginEnd="56dp"
-        android:textSize="30dp"
         android:text=""
+        android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@+id/TextDetection"
         app:layout_constraintTop_toTopOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>
