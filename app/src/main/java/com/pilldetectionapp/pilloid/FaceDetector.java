@@ -2,6 +2,7 @@ package com.pilldetectionapp.pilloid;
 
 import android.graphics.Bitmap;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -20,6 +21,8 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.util.List;
+
+import static com.firebase.ui.auth.AuthUI.getApplicationContext;
 
 public class FaceDetector {
     // Attributes
@@ -89,6 +92,7 @@ public class FaceDetector {
 
     public void StartFaceDetection(Mat frame){
 
+
         // Creation of the firebase image
         FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapFromMat(frame));
 
@@ -120,7 +124,10 @@ public class FaceDetector {
                                         // We set the mouth position only for the first face detected
                                         if (count == 1) {
                                             Get_SetMouthPositionFromFirebaseVisionFace(faces.get(0));
-                                        } else setMouth_detected(false);
+                                        } else {
+                                            setMouth_detected(false);
+                                            setFace_Detected(false);
+                                        }
                                         // We set the number of detected faces
                                         setNb_Faces_Detected(count);
                                     }
@@ -129,7 +136,6 @@ public class FaceDetector {
                                 new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception e) {
-                                        // Task failed with an exception
                                     }
                                 });
     }

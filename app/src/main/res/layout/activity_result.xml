@@ -25,7 +25,7 @@
 
     <TextView
         android:id="@+id/step_One"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="Step One"
         android:textSize="30dp"
@@ -38,7 +38,7 @@
 
     <TextView
         android:id="@+id/step_Two"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="Step Two"
         android:textSize="30dp"
@@ -52,7 +52,7 @@
 
     <TextView
         android:id="@+id/step_Three"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="Step Three"
         android:textSize="30dp"
@@ -65,7 +65,7 @@
 
     <TextView
         android:id="@+id/step_Four"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text="Step Four"
         android:textSize="30dp"
@@ -78,7 +78,7 @@
 
     <TextView
         android:id="@+id/step_One_result"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text=""
         android:textSize="30dp"
@@ -91,7 +91,7 @@
 
     <TextView
         android:id="@+id/step_Two_result"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text=""
         android:textSize="30dp"
@@ -104,7 +104,7 @@
 
     <TextView
         android:id="@+id/step_Three_result"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text=""
         android:textSize="30dp"
@@ -117,7 +117,7 @@
 
     <TextView
         android:id="@+id/step_Four_result"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="50dp"
         android:text=""
         android:textSize="30dp"
@@ -128,12 +128,13 @@
         app:layout_constraintTop_toBottomOf="@+id/step_Three_result"
         app:layout_constraintVertical_bias="0.077" />
 
+
     <TextView
-        android:id="@+id/TextDetection"
-        android:layout_width="148dp"
+        android:id="@+id/textDetection"
+        android:layout_width="150dp"
         android:layout_height="93dp"
         android:layout_marginTop="108dp"
-        android:layout_marginEnd="180dp"
+        android:layout_marginEnd="216dp"
         android:text="Text detection"
         android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -141,14 +142,37 @@
 
     <TextView
         android:id="@+id/TextDetectionResult"
-        android:layout_width="107dp"
-        android:layout_height="45dp"
-        android:layout_marginTop="128dp"
-        android:layout_marginEnd="56dp"
+        android:layout_width="150dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="124dp"
         android:text=""
         android:textSize="30dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@+id/TextDetection"
+        app:layout_constraintHorizontal_bias="0.378"
+        app:layout_constraintStart_toEndOf="@+id/textDetection"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/FaceDetection"
+        android:layout_width="150dp"
+        android:layout_height="93dp"
+        android:layout_marginTop="232dp"
+        android:layout_marginEnd="216dp"
+        android:text="Face detection"
+        android:textSize="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/FaceDetectionResult"
+        android:layout_width="150dp"
+        android:layout_height="47dp"
+        android:layout_marginEnd="16dp"
+        android:text=""
+        android:textSize="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/FaceDetection"
+        app:layout_constraintTop_toBottomOf="@+id/TextDetectionResult"
+        app:layout_constraintVertical_bias="0.424" />
 </androidx.constraintlayout.widget.ConstraintLayout>

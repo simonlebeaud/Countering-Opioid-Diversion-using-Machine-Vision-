@@ -46,7 +46,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Boolean recognitionFinished = false;
     private boolean textDetection_finished;
     private boolean rightTextDetected;
-    private int shown_time, tolerance;
+    private int shown_time, tolerance, no_face_detected;
     private Toast toast;
 
     private TextView message_view,counter_view;
@@ -105,23 +105,30 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
                 // We process face detection on the frame
                 this.detector.getFaceDetector().StartFaceDetection(frame);
-                Log.e("Mouth detected ", this.detector.getFaceDetector().getMouth_detected().toString());
+                face_detected = this.detector.getFaceDetector().getFace_Detected();
+                Log.e("Face detected ", face_detected.toString());
 
-                // We process hand detection on the frame
-                this.detector.getHandDetector().StartHandDetection(frame);
-                Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
+                if (face_detected) {
+                    Log.e("Mouth detected ", this.detector.getFaceDetector().getMouth_detected().toString());
+                    // We process hand detection on the frame
+                    this.detector.getHandDetector().StartHandDetection(frame);
+                    Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
-                if (this.detector.getFaceDetector().getMouth_detected()) {
+                    if (this.detector.getFaceDetector().getMouth_detected()) {
 
-                    // If we detect a mouth we try to detect a pill on it
-                    this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
+                        // If we detect a mouth we try to detect a pill on it
+                        this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
 
-                    // Test the Text detection
-                    //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
+                        // Test the Text detection
+                        //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
 
-                } else this.detector.getPillDetector().setPill_detected(false);
+                    } else this.detector.getPillDetector().setPill_detected(false);
 
-                process_steps();
+                    process_steps();
+                } else {
+                    no_face_detected++;
+                    ShowToast("No Face Detected");
+                }
             }
         }
         counter +=1;
@@ -199,6 +206,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         this.rightTextDetected = false;
         this.tolerance = 0;
         this.shown_time = 0;
+        this.no_face_detected = 0;
 
         this.recognitionInProgress =false;
         this.recognitionFinished = false;
@@ -213,7 +221,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private void process_steps(){
         pill_detected = this.detector.getPillDetector().getPill_detected();
         mouth_detected = this.detector.getFaceDetector().getMouth_detected();
-        face_detected = this.detector.getFaceDetector().getFace_Detected();
         hands_detected = this.detector.getHandDetector().getHand_detected();
 
 
@@ -346,6 +353,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 intent.putExtra("StepThreeResult",!pill_removed);
                 intent.putExtra("StepFourResult",good_finished);
                 intent.putExtra("TextDetectionResult",rightTextDetected);
+                intent.putExtra("FaceVerificationResult",rightPerson);
                 Log.e("Text detection Result ", String.valueOf(rightTextDetected));
                 // add verification result ...
                 startActivity(intent);
@@ -362,7 +370,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 runOnUiThread(new Runnable() {
                     public void run()
                     {
-                        Toast.makeText(getApplicationContext(), "That's not the right person", Toast.LENGTH_LONG).show();
+                        //Toast.makeText(getApplicationContext(), "That's not the right person", Toast.LENGTH_LONG).show();
                     }
                 });
             }
