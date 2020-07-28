@@ -38,7 +38,7 @@ public class FaceNetModel {
 
     // Gets an face embedding using FaceNet
     public float[] getFaceEmbedding( Bitmap image, Rect crop, float angle) {
-        saveTempBitmap(cropRectFromBitmap(image, crop, angle));
+        //saveTempBitmap(cropRectFromBitmap(image, crop, angle));
         return runFaceNet(
                 convertBitmapToBuffer(
                         cropRectFromBitmap( image , crop , angle )
