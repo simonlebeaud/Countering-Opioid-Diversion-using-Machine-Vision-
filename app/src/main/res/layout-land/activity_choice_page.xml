@@ -19,27 +19,28 @@
         app:layout_constraintVertical_bias="0.346"
         tools:srcCompat="@tools:sample/avatars" />
 
+
     <Button
         android:id="@+id/RunButton"
-        android:layout_width="318dp"
-        android:layout_height="144dp"
-        android:layout_marginBottom="124dp"
+        android:layout_width="402dp"
+        android:layout_height="71dp"
+        android:layout_marginBottom="16dp"
         android:text="Run the detection"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.505"
+        app:layout_constraintHorizontal_bias="0.435"
         app:layout_constraintStart_toStartOf="parent" />
-
 
     <TextView
         android:id="@+id/NameView"
-        android:layout_width="372dp"
-        android:layout_height="139dp"
-        android:layout_marginTop="36dp"
+        android:layout_width="426dp"
+        android:layout_height="98dp"
+        android:layout_marginTop="4dp"
         android:textColor="#020304"
         android:gravity="center"
         android:textSize="40dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.434"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 

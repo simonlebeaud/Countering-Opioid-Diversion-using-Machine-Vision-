@@ -1,18 +1,23 @@
 package com.pilldetectionapp.pilloid;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.provider.MediaStore;
 import android.util.Log;
+import android.view.SurfaceView;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -24,59 +29,101 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import org.opencv.android.BaseLoaderCallback;
+import org.opencv.android.CameraBridgeViewBase;
+import org.opencv.android.JavaCameraView;
+import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
 
-public class TakePhotoActivity extends AppCompatActivity {
-    private ImageView my_image;
-    private com.google.android.material.floatingactionbutton.FloatingActionButton Return_Button;
-    private Toast toast;
+public class ChangeProfileImageActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
+    CameraBridgeViewBase cameraBridgeViewBase;
+    BaseLoaderCallback baseLoaderCallback;
 
-    private int REQUEST_CODE_FOR_IMAGE = 1000;
+    Mat frame;
+    Bitmap bitmap;
+    Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_take_photo_activty);
-        my_image = (ImageView) findViewById(R.id.imageView);
-        // set button
-        Return_Button=findViewById(R.id.ReturnButton);
-        Return_Button.setOnClickListener(new View.OnClickListener() {
+        setContentView(R.layout.activity_change_profile_image);
+
+        cameraBridgeViewBase = (JavaCameraView)findViewById(R.id.CameraView);
+        // 1 correspond to frontal Camera
+        cameraBridgeViewBase.setCameraIndex(1);
+        cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
+        cameraBridgeViewBase.setCvCameraViewListener(this);
+
+        //System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+        baseLoaderCallback = new BaseLoaderCallback(this) {
             @Override
-            public void onClick(View view) {
-                // WHen the user click on the the run_button we launch the detection activity
-                Intent intent = new Intent(TakePhotoActivity.this, ActivityChoicePage.class);
-                startActivity(intent);
+            public void onManagerConnected(int status) {
+                super.onManagerConnected(status);
+
+                switch(status){
+
+                    case BaseLoaderCallback.SUCCESS:
+                        cameraBridgeViewBase.enableView();
+                        break;
+                    default:
+                        super.onManagerConnected(status);
+                        break;
+                }
             }
-        });
-
+        };
     }
-
-    public void takePhoto(View view) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (intent.resolveActivity((getPackageManager())) != null) {
-            startActivityForResult(intent, REQUEST_CODE_FOR_IMAGE);
-        }
-    }
-
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_FOR_IMAGE) {
-            switch (resultCode) {
-                case RESULT_OK:
-                    Log.i("Photo Activity", "Result OK");
-                    Bitmap bitmap = (Bitmap) data.getExtras().get("data");
-                    my_image.setImageBitmap(bitmap);
-                    uploadImage(bitmap);
-                    break;
-                case RESULT_CANCELED:
-                    Log.i("Photo Activity", "Result Cancelled");
-                    break;
-                default:
-                    break;
-            }
+    public void onCameraViewStarted(int width, int height) {
+
+    }
+
+    @Override
+    public void onCameraViewStopped() {
+
+    }
+
+    @Override
+    public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
+        System.gc();
+        this.frame = inputFrame.rgba();
+
+        return this.frame;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (!OpenCVLoader.initDebug()){
+            Toast.makeText(getApplicationContext(),"There's a problem, yo!", Toast.LENGTH_SHORT).show();
         }
+        else
+        {
+            baseLoaderCallback.onManagerConnected(baseLoaderCallback.SUCCESS);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(cameraBridgeViewBase!=null){
+
+            cameraBridgeViewBase.disableView();
+        }
+
+    }
+
+    public void TakeProfilePhoto(View view) {
+        // We ge the bitmap from the frame on the screen
+        this.bitmap = bitmapFromMat(this.frame);
+
+        // We upload the image on the firebase storage
+        uploadImage(this.bitmap);
     }
 
     // Upload the image on the cloud
@@ -127,22 +174,28 @@ public class TakePhotoActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(TakePhotoActivity.this, "Saving successed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChangeProfileImageActivity.this, "Saving successed", Toast.LENGTH_SHORT).show();
 
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(TakePhotoActivity.this, "Profile Image Setting failed", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(ChangeProfileImageActivity.this, "Profile Image Setting failed", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    public void ShowToast(final String text){
+    // Method allowing to transform our frame into bitmap
+    public static Bitmap bitmapFromMat(Mat mRgba) {
+        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mRgba, bitmap);
+        return bitmap;
+    }
+
+    public void ShowToast(final String text) {
         runOnUiThread(new Runnable() {
-            public void run()
-            {
+            public void run() {
                 int toastDurationInMilliSeconds = 2500;
                 CountDownTimer toastCountDown;
                 toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
@@ -152,6 +205,7 @@ public class TakePhotoActivity extends AppCompatActivity {
                     public void onTick(long millisUntilFinished) {
                         toast.show();
                     }
+
                     public void onFinish() {
                         toast.cancel();
                     }
@@ -163,4 +217,8 @@ public class TakePhotoActivity extends AppCompatActivity {
         });
     }
 
+    public void Return(View view) {
+        Intent intent = new Intent(ChangeProfileImageActivity.this, ActivityChoicePage.class);
+        startActivity(intent);
+    }
 }
