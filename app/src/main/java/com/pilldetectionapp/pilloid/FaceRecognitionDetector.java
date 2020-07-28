@@ -1,16 +1,11 @@
 package com.pilldetectionapp.pilloid;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -22,7 +17,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
@@ -33,9 +27,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class FaceRecognitionDetector {
@@ -71,6 +63,8 @@ public class FaceRecognitionDetector {
     public boolean analyse(Mat frame) {
         boolean recogSucess = false;
 
+
+
         this.bitmap = bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
@@ -99,10 +93,10 @@ public class FaceRecognitionDetector {
             }
             if (!facesInSaved.isEmpty()) {
                 Log.e(TAG, "face found on new image");
-                imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 90f);
+                imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 0f);
 
                 if (FaceRecognitionDetector.this.foundFace != null) {
-                    float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 90f);
+                    float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 0f);
                     double highestSimilarityScore = -1f;
                     String highestSimilarityScoreName = "";
 
@@ -129,8 +123,9 @@ public class FaceRecognitionDetector {
         if (source.length != target.length)
             throw new RuntimeException("Arrays must be same size");
         double dotProduct = 0;
-        for (int i = 0; i < source.length; i++)
+        for (int i = 0; i < source.length; i++) {
             dotProduct += source[i] * target[i];
+        }
         float normS = .0f;
         float normT = .0f;
         for(int k = 0; k < source.length; ++k) {

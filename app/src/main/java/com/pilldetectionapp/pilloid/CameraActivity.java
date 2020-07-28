@@ -32,6 +32,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
     int counter = 0;
+    int recogCount= 0;
 
     private Mat frame;
     private Mat[] frame_for_text_detection;
@@ -98,8 +99,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         frame = inputFrame.rgba();
 
         if (counter % 30 == 0) {
-            if( !rightPerson  ) {
+            if( !rightPerson || recogCount < 6  ) {
                 this.checkPersonsFaceIdentity(frame);
+                recogCount += 1;
             } else {
                 Log.e("Frame took", "frame picked");
 
