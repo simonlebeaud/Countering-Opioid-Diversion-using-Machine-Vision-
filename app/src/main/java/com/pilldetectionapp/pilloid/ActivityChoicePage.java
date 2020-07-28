@@ -88,7 +88,7 @@ public class ActivityChoicePage extends AppCompatActivity {
     }
 
     public void ChangeProfileImage(View view) {
-            Intent intent = new Intent(ActivityChoicePage.this,TakePhotoActivity.class);
+            Intent intent = new Intent(ActivityChoicePage.this,ChangeProfileImageActivity.class);
             startActivity(intent);
     }
 

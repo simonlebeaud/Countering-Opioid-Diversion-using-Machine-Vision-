@@ -8,6 +8,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -85,7 +86,7 @@ public class FaceRecognitionDetector {
         }
         if (facesInInput != null && !facesInInput.isEmpty()) {
             this.foundFace = facesInInput.get(0).getBoundingBox();
-            Log.e(TAG, "face found on saved image");
+            Log.e(TAG, "face found on new image");
             this.model = new FaceNetModel(activity.getAssets());
 
             this.imageData = new float[128];
@@ -98,7 +99,9 @@ public class FaceRecognitionDetector {
                 e.printStackTrace();
             }
             if (!facesInSaved.isEmpty()) {
-                Log.e(TAG, "face found on new image");
+                Log.e(TAG, "face found on saved image");
+
+
                 imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 90f);
 
                 if (FaceRecognitionDetector.this.foundFace != null) {
@@ -107,7 +110,7 @@ public class FaceRecognitionDetector {
                     String highestSimilarityScoreName = "";
 
                     if (imageData != null) {
-                        highestSimilarityScore = cosineSimilarity(subject, imageData);
+                        highestSimilarityScore = cosineSimilarity( subject,imageData);
 
                         Log.e(TAG, String.valueOf(highestSimilarityScore));
 
@@ -129,8 +132,9 @@ public class FaceRecognitionDetector {
         if (source.length != target.length)
             throw new RuntimeException("Arrays must be same size");
         double dotProduct = 0;
-        for (int i = 0; i < source.length; i++)
+        for (int i = 0; i < source.length; i++) {
             dotProduct += source[i] * target[i];
+        }
         float normS = .0f;
         float normT = .0f;
         for(int k = 0; k < source.length; ++k) {
@@ -155,7 +159,7 @@ public class FaceRecognitionDetector {
         long ONE_MEGABYTE = 1024*1024;
         user = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference gsReference = storage.getReferenceFromUrl("gs://pilloid.appspot.com/profileImages/" + user.getUid() + ".jpeg");
+        StorageReference gsReference = storage.getReferenceFromUrl("gs://pilloid.appspot.com/profileImages/" + user.getUid() + ".PNG");
         gsReference.getBytes(ONE_MEGABYTE)
                 .addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
