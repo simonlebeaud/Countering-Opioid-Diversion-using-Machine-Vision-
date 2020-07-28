@@ -28,7 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ChangeProfileImageActivity"></activity>
+
         <activity android:name=".FirstPageActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -38,7 +38,7 @@
         </activity>
         <activity android:name=".ActivityChoicePage" />
         <activity
-            android:name=".TakePhotoActivity"
+            android:name=".ChangeProfileImageActivity"
             android:screenOrientation="landscape" />
         <activity
             android:name=".GetTextActivity"
@@ -47,7 +47,6 @@
             android:name=".CameraActivity"
             android:screenOrientation="landscape" />
         <activity android:name=".ResultActivity" />
-        <activity android:name=".MainActivity" />
 
         <meta-data
             android:name="com.google.firebase.ml.vision.DEPENDENCIES"
