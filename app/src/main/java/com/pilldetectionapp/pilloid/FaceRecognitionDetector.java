@@ -102,15 +102,15 @@ public class FaceRecognitionDetector {
 
                 if (FaceRecognitionDetector.this.foundFace != null) {
                     float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 0f);
-                    double highestSimilarityScore = -1f;
-                    String highestSimilarityScoreName = "";
+                    double similarityScore = -1f;
+                    String similarityScoreName = "";
 
                     if (imageData != null) {
-                        highestSimilarityScore = cosineSimilarity( subject, imageData );
+                        similarityScore = cosineSimilarity( subject, imageData );
 
-                        Log.e(TAG, String.valueOf(highestSimilarityScore));
+                        Log.e(TAG, String.valueOf(similarityScore));
 
-                        if (highestSimilarityScore > 0.7f) {
+                        if (similarityScore > 0.85f) {
                             Log.e(TAG, "recog success ");
                             recogSucess = true;
                         }
@@ -171,5 +171,4 @@ public class FaceRecognitionDetector {
                 });
 
     }
-
 }

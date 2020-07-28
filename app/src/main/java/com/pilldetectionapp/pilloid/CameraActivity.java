@@ -371,7 +371,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
             Boolean test;
             //this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
             test =this.detector.getFaceRecognitionDetector().analyse(frame);
-            if (test) ShowToast("yes");;
+            if (test) ShowToast("yes");
             if(!rightPerson) {
                 runOnUiThread(new Runnable() {
                     public void run()
