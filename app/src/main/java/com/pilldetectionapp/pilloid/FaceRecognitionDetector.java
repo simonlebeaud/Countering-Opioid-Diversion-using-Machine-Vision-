@@ -152,11 +152,11 @@ public class FaceRecognitionDetector {
 
 
     private void getUsersImage(){
-        long ONE_MEGABYTE = 1024*1024;
+        long TWO_MEGABYTE = 1024*1024*2;
         user = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference gsReference = storage.getReferenceFromUrl("gs://pilloid.appspot.com/profileImages/" + user.getUid() + ".jpeg");
-        gsReference.getBytes(ONE_MEGABYTE)
+        gsReference.getBytes(TWO_MEGABYTE)
                 .addOnSuccessListener(new OnSuccessListener<byte[]>() {
                     @Override
                     public void onSuccess(byte[] bytes) {

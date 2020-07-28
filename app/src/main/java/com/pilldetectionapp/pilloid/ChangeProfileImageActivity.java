@@ -130,11 +130,11 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
     private void uploadImage(Bitmap bitmap) {
         ShowToast("Saving...");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         String uid = FirebaseAuth.getInstance().getUid();
         final StorageReference reference = FirebaseStorage.getInstance().getReference()
                 .child("profileImages")
-                .child(uid + ".PNG");
+                .child(uid + ".jpeg");
         reference.putBytes(baos.toByteArray())
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
