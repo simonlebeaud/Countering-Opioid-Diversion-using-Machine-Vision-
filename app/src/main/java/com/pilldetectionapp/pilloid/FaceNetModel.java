@@ -8,6 +8,8 @@ import android.graphics.Rect;
 import android.os.Environment;
 import android.util.Log;
 
+import com.pilldetectionapp.pilloid.exceptions.BoundingBoxOutOfPictureException;
+
 import org.tensorflow.lite.Interpreter;
 
 import java.io.File;
@@ -37,7 +39,7 @@ public class FaceNetModel {
     }
 
     // Gets an face embedding using FaceNet
-    public float[] getFaceEmbedding( Bitmap image, Rect crop, float angle) {
+    public float[] getFaceEmbedding( Bitmap image, Rect crop, float angle) throws BoundingBoxOutOfPictureException {
         //saveTempBitmap(cropRectFromBitmap(image, crop, angle));
         return runFaceNet(
                 convertBitmapToBuffer(
@@ -87,8 +89,11 @@ public class FaceNetModel {
     }
 
     // Crop the given bitmap with the given rect.
-    private Bitmap cropRectFromBitmap(Bitmap source, Rect rect , float angle ) {
+    private Bitmap cropRectFromBitmap(Bitmap source, Rect rect , float angle ) throws BoundingBoxOutOfPictureException {
         Bitmap cropped;
+        if ((rect.left+rect.width())>source.getWidth() || (rect.top+rect.height())>source.getHeight()) {
+            throw new BoundingBoxOutOfPictureException("The face is partly out of the picture");
+        }
         if ( angle != 0 ) {
             Log.e("SIZE BITMAP : ", source.getWidth() + " " + source.getHeight());
             Log.e("SIZE BITMAP : ", rect.left + " " + rect.top + " " + rect.width() + " " + rect.height());

@@ -29,6 +29,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.pilldetectionapp.pilloid.exceptions.BoundingBoxOutOfPictureException;
 
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
@@ -67,8 +68,8 @@ public class FaceRecognitionDetector {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public boolean analyse(Mat frame) {
-        boolean recogSucess = false;
+    public boolean analyse(Mat frame) throws BoundingBoxOutOfPictureException {
+        boolean recognitionSucceed = false;
 
         this.bitmap = bitmapFromMat(frame);
 
@@ -83,23 +84,19 @@ public class FaceRecognitionDetector {
             e.printStackTrace();
         }
         if (facesInInput != null && !facesInInput.isEmpty()) {
-            this.foundFace = facesInInput.get(0).getBoundingBox();
-            Log.e(TAG, "face found on new image");
-            this.model = new FaceNetModel(activity.getAssets());
+            try{
+                this.foundFace = facesInInput.get(0).getBoundingBox();
+                Log.e(TAG, "face found on new image");
+                this.model = new FaceNetModel(activity.getAssets());
 
-            this.imageData = new float[128];
+                this.imageData = new float[128];
 
-            FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(savedImage);
+                FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(savedImage);
 
-            try {
                 facesInSaved = Tasks.await(face_detector.detectInImage(reference));
-            } catch (InterruptedException | ExecutionException e) {
-                e.printStackTrace();
-            }
-            if (!facesInSaved.isEmpty()) {
+
                 Log.e(TAG, "face found on saved image");
                 imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 0f);
-
                 if (FaceRecognitionDetector.this.foundFace != null) {
                     float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 0f);
                     double similarityScore = -1f;
@@ -112,16 +109,19 @@ public class FaceRecognitionDetector {
 
                         if (similarityScore > 0.85f) {
                             Log.e(TAG, "recog success ");
-                            recogSucess = true;
+                            recognitionSucceed = true;
                         }
 
                     }
+                } else {
+                    Log.e(TAG, "no face on new image");
                 }
-            } else {
-                Log.e(TAG, "no face on new image");
+            } catch (InterruptedException | ExecutionException | BoundingBoxOutOfPictureException e){
+                e.printStackTrace();
             }
+
         }
-        return recogSucess;
+        return recognitionSucceed;
     }
 
     protected double cosineSimilarity(float[] source, float[] target) {

@@ -1,23 +1,16 @@
 package com.pilldetectionapp.pilloid;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -37,11 +30,11 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
 
 public class ChangeProfileImageActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
+    FaceDetector faceDetector;
 
     Mat frame;
     Bitmap bitmap;
@@ -75,6 +68,8 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
                 }
             }
         };
+
+        faceDetector = new FaceDetector();
     }
 
     @Override
@@ -121,9 +116,12 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
     public void TakeProfilePhoto(View view) {
         // We ge the bitmap from the frame on the screen
         this.bitmap = bitmapFromMat(this.frame);
-
-        // We upload the image on the firebase storage
-        uploadImage(this.bitmap);
+        if( this.faceDetector.findFaceInImage(this.bitmap)){
+            // We upload the image on the firebase storage
+            uploadImage(this.bitmap);
+        } else {
+            ShowToast("We couldn't find you on that picture, please position yourself better");
+        }
     }
 
     // Upload the image on the cloud
@@ -198,7 +196,7 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
             public void run() {
                 int toastDurationInMilliSeconds = 2500;
                 CountDownTimer toastCountDown;
-                toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
+                toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
                 // Set the countdown to display the toast
 
                 toastCountDown = new CountDownTimer(toastDurationInMilliSeconds, 1000 /*Tick duration*/) {

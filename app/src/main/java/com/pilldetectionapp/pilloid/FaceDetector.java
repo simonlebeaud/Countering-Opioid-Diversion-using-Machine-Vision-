@@ -1,14 +1,15 @@
 package com.pilldetectionapp.pilloid;
 
 import android.graphics.Bitmap;
+import android.graphics.Rect;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.common.FirebaseVisionPoint;
@@ -21,8 +22,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.util.List;
-
-import static com.firebase.ui.auth.AuthUI.getApplicationContext;
+import java.util.concurrent.ExecutionException;
 
 public class FaceDetector {
     // Attributes
@@ -57,6 +57,8 @@ public class FaceDetector {
 
 
     // Getters
+    public FirebaseVisionFaceDetector getFace_detector() { return face_detector; }
+
     public int getNb_Faces_Detected(){
         return this.nb_faces_detected;
     }
@@ -194,9 +196,21 @@ public class FaceDetector {
         result[3] = (int) ((pos[5] - pos[1])*1.05);
         this.setMouth_Position(result);
 
+    }
 
-
-
+    public boolean findFaceInImage(Bitmap bitmap) {
+        List<FirebaseVisionFace> faces = null;
+        try{
+            faces = Tasks.await(this.face_detector.detectInImage(FirebaseVisionImage.fromBitmap(bitmap)));
+            Rect face = faces.get(0).getBoundingBox();
+            if ((face.left+face.width())>bitmap.getWidth() || (face.top+face.height())>bitmap.getHeight()) {
+                return false;
+            }
+        } catch (ExecutionException | InterruptedException e) {
+          e.printStackTrace();
+        }
+        assert faces != null;
+        return !faces.isEmpty();
     }
 
 }
