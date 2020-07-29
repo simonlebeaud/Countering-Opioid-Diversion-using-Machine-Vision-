@@ -30,6 +30,8 @@ public class FaceDetector {
     private Boolean face_detected;
 
     private Boolean mouth_detected;
+
+    private Bitmap bitmap;
     // x, y , width, height
     private int[] mouth_position;
     private FirebaseVisionFaceDetectorOptions settings;
@@ -94,10 +96,9 @@ public class FaceDetector {
     // Methods
 
     public void StartFaceDetection(Mat frame){
-
-
+        this.bitmap = bitmapFromMat(frame);
         // Creation of the firebase image
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapFromMat(frame));
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(this.bitmap);
 
         // Start the detection
         Task<List<FirebaseVisionFace>> result =
@@ -114,16 +115,19 @@ public class FaceDetector {
 
                                         //
                                         for (FirebaseVisionFace face : faces) {
-                                            count = count +1;
 
-                                            // We have detected minimum one face
-                                            setFace_Detected(true);
+                                            Rect Face = faces.get(0).getBoundingBox();
 
-                                            // We print in the logCat that we have detected one face
-                                            Log.e("Face Detector", "Detected");
+                                            // We check if the face is entirely in the picture
+                                            if (!((Face.left+Face.width())>bitmap.getWidth() || (Face.top+Face.height())>bitmap.getHeight())) {
+                                                count = count +1;
+                                                // We have detected minimum one face
+                                                setFace_Detected(true);
 
+                                                // We print in the logCat that we have detected one face
+                                                Log.e("Face Detector", "Detected");
+                                            }
                                         }
-
                                         // We set the mouth position only for the first face detected
                                         if (count == 1) {
                                             Get_SetMouthPositionFromFirebaseVisionFace(faces.get(0));
@@ -143,13 +147,6 @@ public class FaceDetector {
                                 });
     }
 
-
-    // Method allowing to transform our frame into bitmap
-    public static Bitmap bitmapFromMat(Mat mRgba) {
-        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mRgba, bitmap);
-        return bitmap;
-    }
 
     public void Get_SetMouthPositionFromFirebaseVisionFace (FirebaseVisionFace face){
         float[] pos = new float[6];
@@ -198,19 +195,30 @@ public class FaceDetector {
 
     }
 
-    public boolean findFaceInImage(Bitmap bitmap) {
+    public boolean findFaceInImage(Mat frame) {
+        bitmap = bitmapFromMat(frame);
         List<FirebaseVisionFace> faces = null;
         try{
             faces = Tasks.await(this.face_detector.detectInImage(FirebaseVisionImage.fromBitmap(bitmap)));
-            Rect face = faces.get(0).getBoundingBox();
-            if ((face.left+face.width())>bitmap.getWidth() || (face.top+face.height())>bitmap.getHeight()) {
-                return false;
+            if (!faces.isEmpty()) {
+                Rect face = faces.get(0).getBoundingBox();
+                // If we detect a face but it's not entirely in the picture we return false
+                if ((face.left+face.width())>bitmap.getWidth() || (face.top+face.height())>bitmap.getHeight()) {
+                    return false;
+                }
             }
         } catch (ExecutionException | InterruptedException e) {
           e.printStackTrace();
         }
         assert faces != null;
         return !faces.isEmpty();
+    }
+
+    // Method allowing to transform our frame into bitmap
+    public static Bitmap bitmapFromMat(Mat mRgba) {
+        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(mRgba, bitmap);
+        return bitmap;
     }
 
 }

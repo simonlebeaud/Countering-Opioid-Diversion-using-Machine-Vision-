@@ -39,11 +39,15 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
     Mat frame;
     Bitmap bitmap;
     Toast toast;
+    Boolean takePhoto, face_detected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_change_profile_image);
+
+        this.face_detected = false;
+        this.takePhoto = false;
 
         cameraBridgeViewBase = (JavaCameraView)findViewById(R.id.CameraView);
         // 1 correspond to frontal Camera
@@ -87,6 +91,20 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
         System.gc();
         this.frame = inputFrame.rgba();
 
+        if (takePhoto) {
+            takePhoto = false;
+
+            face_detected = this.faceDetector.findFaceInImage(this.frame);
+            if(face_detected){
+                this.bitmap = bitmapFromMat(this.frame);
+                // We upload the image on the firebase storage
+                uploadImage(this.bitmap);
+            }
+            else {
+                ShowToast("We couldn't find you on that picture, please position yourself better");
+            }
+
+        }
         return this.frame;
     }
 
@@ -113,15 +131,15 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
 
     }
 
+    // Onclick method of the TakeButton
     public void TakeProfilePhoto(View view) {
-        // We ge the bitmap from the frame on the screen
-        this.bitmap = bitmapFromMat(this.frame);
-        if( this.faceDetector.findFaceInImage(this.bitmap)){
-            // We upload the image on the firebase storage
-            uploadImage(this.bitmap);
-        } else {
-            ShowToast("We couldn't find you on that picture, please position yourself better");
-        }
+        takePhoto = true;
+    }
+
+    // Onclick method of the returnButton
+    public void Return(View view) {
+        Intent intent = new Intent(ChangeProfileImageActivity.this, ActivityChoicePage.class);
+        startActivity(intent);
     }
 
     // Upload the image on the cloud
@@ -215,8 +233,5 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
         });
     }
 
-    public void Return(View view) {
-        Intent intent = new Intent(ChangeProfileImageActivity.this, ActivityChoicePage.class);
-        startActivity(intent);
-    }
+
 }
