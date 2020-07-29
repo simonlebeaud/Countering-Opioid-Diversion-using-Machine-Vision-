@@ -68,7 +68,7 @@ public class FaceRecognitionDetector {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
-    public boolean analyse(Mat frame) throws BoundingBoxOutOfPictureException {
+    public boolean analyse(Mat frame) {
         boolean recognitionSucceed = false;
 
         this.bitmap = bitmapFromMat(frame);
