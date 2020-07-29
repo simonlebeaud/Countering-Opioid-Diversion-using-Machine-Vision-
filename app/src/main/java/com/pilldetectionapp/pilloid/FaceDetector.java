@@ -55,7 +55,7 @@ public class FaceDetector {
                 .getVisionFaceDetector(this.settings);
     }
 
-    
+
     // Getters
     public int getNb_Faces_Detected(){
         return this.nb_faces_detected;
