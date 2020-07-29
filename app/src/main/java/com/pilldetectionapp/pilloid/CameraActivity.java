@@ -12,6 +12,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,8 +45,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Boolean step_one_finished, step_two_finished, step_three_finished,
             step_four_finished, detection_finished;
     private Boolean counter_can_begin, pill_removed, good_finished;
-    private Boolean recognitionInProgress =false;
-    private Boolean recognitionFinished = false;
+    private Boolean start_button_finished;
+
     private boolean textDetection_finished;
     private boolean rightTextDetected;
     private int shown_time, tolerance, no_face_detected;
@@ -98,7 +100,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         System.gc();
         frame = inputFrame.rgba();
 
-        if (counter % 30 == 0) {
+        if ((counter % 30 == 0)&&(start_button_finished)) {
             if( !rightPerson || recogCount < 6  ) {
                 this.checkPersonsFaceIdentity(frame);
                 recogCount += 1;
@@ -183,7 +185,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     }
 
     private void initialize_variable(){
-
         message_view = (TextView) findViewById(R.id.MessageView);
         counter_view = (TextView) findViewById(R.id.CounterView);
 
@@ -210,8 +211,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         this.shown_time = 0;
         this.no_face_detected = 0;
 
-        this.recognitionInProgress =false;
-        this.recognitionFinished = false;
+        this.start_button_finished = false;
 
         Intent intent = getIntent();
         this.pill_text = intent.getStringExtra(GetTextActivity.EXTRA_TEXT);
@@ -408,4 +408,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         });
     }
 
+    public void Start(View view) {
+        this.start_button_finished = true;
+        Button start_button;
+        start_button = (Button) findViewById(R.id.StartButton);
+        start_button.setVisibility(view.GONE);
+    }
 }
