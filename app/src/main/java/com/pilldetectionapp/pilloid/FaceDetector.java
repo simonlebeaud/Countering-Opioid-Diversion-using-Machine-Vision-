@@ -38,7 +38,9 @@ public class FaceDetector {
 
     private FirebaseVisionFaceDetector face_detector;
 
-    // Constructor
+    /**
+     * constructor, initialise the firebase detectors with wanted settings
+     */
     public FaceDetector(){
         this.nb_faces_detected = 0;
         this.face_detected = false;
@@ -93,8 +95,10 @@ public class FaceDetector {
     }
 
 
-    // Methods
-
+    /**
+     * Detect face presence and prosition in a frame, and also the mouth on that face
+     * @param frame matrix in which we want to detect a face
+     */
     public void StartFaceDetection(Mat frame){
         this.bitmap = bitmapFromMat(frame);
         // Creation of the firebase image
@@ -147,7 +151,10 @@ public class FaceDetector {
                                 });
     }
 
-
+    /**
+     * method to get the mouth from a face and set it to a private variable
+     * @param face
+     */
     public void Get_SetMouthPositionFromFirebaseVisionFace (FirebaseVisionFace face){
         float[] pos = new float[6];
         int[] result = new int[4];
@@ -195,6 +202,11 @@ public class FaceDetector {
 
     }
 
+    /**
+     * method to know if there is a face in the desired frame
+     * @param frame frame to be analysed
+     * @return true if a face is found
+     */
     public boolean findFaceInImage(Mat frame) {
         bitmap = bitmapFromMat(frame);
         List<FirebaseVisionFace> faces = null;

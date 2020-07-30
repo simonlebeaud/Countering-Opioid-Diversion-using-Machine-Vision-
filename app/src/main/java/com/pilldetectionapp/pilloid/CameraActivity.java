@@ -29,6 +29,10 @@ import org.opencv.core.Mat;
 
 import java.util.ArrayList;
 
+/**
+ * Activity Class running the detection to analyse the user's movements
+ */
+
 public class CameraActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     CameraBridgeViewBase cameraBridgeViewBase;
@@ -61,6 +65,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     Detector detector;
 
+    /**
+     * Class constructor, initialise the camera and multiple variable in the methode initialize_variable()
+     * @param savedInstanceState Data from the previous activity ChoicePageActivity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -94,6 +102,13 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     }
 
+    /**
+     * Method to analyse each frame from the camera
+     * On each frame if the identity of the person hasn't been verified, face recognition is run
+     * Face, Mouth, Hand, Pill detection is run. Those information are needed to analyse the user's behaviors.
+     * @param inputFrame frame given by the Camera view listener from OpenCv
+     * @return the current frame available
+     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
@@ -151,7 +166,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     }
 
-
+    /**
+     * Resume activity when you come back to the application
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -165,6 +182,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
+    /**
+     * Pause the process when the application is paused
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -175,7 +195,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     }
 
-
+    /**
+     * destroy activity when the application is quit
+     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -184,6 +206,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
+    /**
+     * initialise all the detectors and variables needed
+     */
     private void initialize_variable(){
         message_view = (TextView) findViewById(R.id.MessageView);
         counter_view = (TextView) findViewById(R.id.CounterView);
@@ -220,6 +245,9 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
 
     }
 
+    /**
+     * method going through each steps of the pill consumption verification
+     */
     private void process_steps(){
         pill_detected = this.detector.getPillDetector().getPill_detected();
         mouth_detected = this.detector.getFaceDetector().getMouth_detected();
@@ -364,14 +392,16 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
+    /**
+     * method used to run face RECOGNITION on a given frame
+     * @param frame frame with face to be recognized
+     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void checkPersonsFaceIdentity(Mat frame) {
         rightPerson = false;
         if(!rightPerson) {
-            Boolean test = false;
-            //this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
-            test = this.detector.getFaceRecognitionDetector().analyse(frame);
-            if (test) ShowToast("Right Person !");;
+            this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
+            if (rightPerson) ShowToast("Right Person !");;
 
             if(!rightPerson) {
                 runOnUiThread(new Runnable() {
@@ -384,6 +414,10 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         }
     }
 
+    /**
+     * method to display Toast on screen
+     * @param text text to be shown
+     */
     public void ShowToast(final String text){
         runOnUiThread(new Runnable() {
             public void run()

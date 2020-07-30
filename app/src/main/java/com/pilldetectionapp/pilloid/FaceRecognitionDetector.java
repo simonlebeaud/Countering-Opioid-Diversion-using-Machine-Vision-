@@ -74,7 +74,7 @@ public class FaceRecognitionDetector {
         this.bitmap = bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
-        List<FirebaseVisionFace> facesInSaved = null;
+        List<FirebaseVisionFace> facesInSaved;
 
         final FirebaseVisionImage inputImage = FirebaseVisionImage.fromBitmap(bitmap);
 
