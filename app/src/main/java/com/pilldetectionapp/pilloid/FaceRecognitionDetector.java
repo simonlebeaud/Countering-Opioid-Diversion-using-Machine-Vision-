@@ -38,6 +38,9 @@ import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * Class to run face recognition
+ */
 public class FaceRecognitionDetector {
 
     private final String TAG = "FaceRecognitionDetector";
@@ -52,6 +55,10 @@ public class FaceRecognitionDetector {
     private FirebaseUser user;
     private URI uri;
 
+    /**
+     * constructor of the face recognition detector
+     * @param activity we need the activity in order to get the assets from that activity
+     */
     public FaceRecognitionDetector(final Activity activity) {
         this.activity = activity;
         this.getUsersImage();
@@ -67,6 +74,11 @@ public class FaceRecognitionDetector {
 
     }
 
+    /**
+     * analyse a given frame and the profile picture of a the authenticated person
+     * @param frame the frame with the user's face on it
+     * @return true if the two person are the same
+     */
     @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean analyse(Mat frame) {
         boolean recognitionSucceed = false;
@@ -74,7 +86,7 @@ public class FaceRecognitionDetector {
         this.bitmap = bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
-        List<FirebaseVisionFace> facesInSaved = null;
+        List<FirebaseVisionFace> facesInSaved;
 
         final FirebaseVisionImage inputImage = FirebaseVisionImage.fromBitmap(bitmap);
 
@@ -124,6 +136,12 @@ public class FaceRecognitionDetector {
         return recognitionSucceed;
     }
 
+    /**
+     * Compute cosine Similarity between two embeddings
+     * @param source 1st embeddings
+     * @param target 2nd embeddings
+     * @return the cosine similarity, double between 0 and 1
+     */
     protected double cosineSimilarity(float[] source, float[] target) {
         if (source.length != target.length)
             throw new RuntimeException("Arrays must be same size");
@@ -142,15 +160,23 @@ public class FaceRecognitionDetector {
     }
 
 
-
-    public static Bitmap bitmapFromMat(Mat mRgba) {
-        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mRgba, bitmap);
+    /**
+     * Convert Mat to Bitmap
+     * @param image matrix to be converted
+     * @return the converted bitmap
+     */
+    public static Bitmap bitmapFromMat(Mat image) {
+        Bitmap bitmap = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(image, bitmap);
 
         return bitmap;
     }
 
 
+    /**
+     * Each user has a profile picture
+     * retrieve the profile picture, and assign it to a private variable
+     */
     private void getUsersImage(){
         long TWO_MEGABYTE = 1024*1024*2;
         user = FirebaseAuth.getInstance().getCurrentUser();

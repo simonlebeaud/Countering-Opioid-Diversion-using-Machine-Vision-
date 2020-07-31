@@ -31,6 +31,9 @@ import org.opencv.core.Mat;
 
 import java.io.ByteArrayOutputStream;
 
+/**
+ * Activity to change the user's profile picture
+ */
 public class ChangeProfileImageActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
     CameraBridgeViewBase cameraBridgeViewBase;
     BaseLoaderCallback baseLoaderCallback;
@@ -41,6 +44,10 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
     Toast toast;
     Boolean takePhoto, face_detected;
 
+    /**
+     * Class constructor, initialise the camera
+     * @param savedInstanceState Data from the previous activity ChoicePageActivity
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,6 +93,12 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
 
     }
 
+    /**
+     * Method to analyse each frame from the camera
+     * here we check if we find a face on the frame if button is pressed and then we upload it
+     * @param inputFrame frame given by the Camera view listener from OpenCv
+     * @return the current frame available
+     */
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         System.gc();
@@ -108,6 +121,9 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
         return this.frame;
     }
 
+    /**
+     * Resume activity when you come back to the application
+     */
     @Override
     protected void onResume() {
         super.onResume();
@@ -121,6 +137,9 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
         }
     }
 
+    /**
+     * Pause the process when the application is paused
+     */
     @Override
     protected void onPause() {
         super.onPause();
@@ -131,18 +150,27 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
 
     }
 
-    // Onclick method of the TakeButton
+    /**
+     * When button is pressed changes boolean value to capture frame
+     * @param view
+     */
     public void TakeProfilePhoto(View view) {
         takePhoto = true;
     }
 
-    // Onclick method of the returnButton
+    /**
+     * When return button is pressed, go back to previous activity
+     * @param view
+     */
     public void Return(View view) {
         Intent intent = new Intent(ChangeProfileImageActivity.this, ActivityChoicePage.class);
         startActivity(intent);
     }
 
-    // Upload the image on the cloud
+    /**
+     * Upload image on the Firebase cloud
+     * @param bitmap
+     */
     private void uploadImage(Bitmap bitmap) {
         ShowToast("Saving...");
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -167,6 +195,10 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
 
     }
 
+    /**
+     * get download Url used to upload image
+     * @param reference
+     */
     private void getDownloadUrl (StorageReference reference){
         reference.getDownloadUrl()
                 .addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -179,6 +211,10 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
                 });
     }
 
+    /**
+     *
+     * @param uri
+     */
     private void setUserProfileUrl(Uri uri) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -202,13 +238,22 @@ public class ChangeProfileImageActivity extends AppCompatActivity implements Cam
                 });
     }
 
+    /**
+     * Method to transform matrix to bitmap
+     * @param frame matrix to be converted
+     * @return transfromed bitmap
+     */
     // Method allowing to transform our frame into bitmap
-    public static Bitmap bitmapFromMat(Mat mRgba) {
-        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mRgba, bitmap);
+    public static Bitmap bitmapFromMat(Mat frame) {
+        Bitmap bitmap = Bitmap.createBitmap(frame.cols(), frame.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(frame, bitmap);
         return bitmap;
     }
 
+    /**
+     * method to show Toast on screen
+     * @param text text to be shown
+     */
     public void ShowToast(final String text) {
         runOnUiThread(new Runnable() {
             public void run() {

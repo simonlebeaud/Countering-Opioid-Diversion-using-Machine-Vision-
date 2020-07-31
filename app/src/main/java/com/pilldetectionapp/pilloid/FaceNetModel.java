@@ -27,7 +27,10 @@ public class FaceNetModel {
 
     private Interpreter interpreter;
 
-
+    /**
+     * Class computing any necessary information in order to do face recognition
+     * @param assetManager assets, including the FaceNet model used for face recognition
+     */
     public FaceNetModel(AssetManager assetManager) {
         try {
             this.interpreter = new Interpreter(loadModelFile(assetManager));
@@ -38,26 +41,42 @@ public class FaceNetModel {
         this.interpreter.setNumThreads(4);
     }
 
+    /**
+     * compute the embeddings from an image's face
+     * @param image the image containing the face to be recognise
+     * @param faceBoundingBox the bounding box of the face
+     * @param angle angle needed if the image need to be rotated (it depends on the camera captor orientation)
+     * @return the embedding of the face, which is a table of float of size 128
+     * @throws BoundingBoxOutOfPictureException Sometimes the face can be somehow out of the picture
+     */
     // Gets an face embedding using FaceNet
-    public float[] getFaceEmbedding( Bitmap image, Rect crop, float angle) throws BoundingBoxOutOfPictureException {
-        //saveTempBitmap(cropRectFromBitmap(image, crop, angle));
+    public float[] getFaceEmbedding( Bitmap image, Rect faceBoundingBox, float angle) throws BoundingBoxOutOfPictureException {
         return runFaceNet(
                 convertBitmapToBuffer(
-                        cropRectFromBitmap( image , crop , angle )
+                        cropRectFromBitmap( image, faceBoundingBox, angle )
                 )
-        )[0];
+        );
 
     }
 
-    // Run the FaceNet model.
-    private float[][] runFaceNet(ByteBuffer inputs){
+    /**
+     * Run the image through the model
+     * @param inputs the image of the face converted to ByteBuffer
+     * @return
+     */
+    private float[] runFaceNet(ByteBuffer inputs){
         long t1 = System.currentTimeMillis();
-        float[][] outputs = new float[1][128];
+        float[] outputs = new float[128];
         interpreter.run(inputs, outputs);
         Log.e( "Performance" , "FaceNet Inference Speed in ms : " + (System.currentTimeMillis() - t1));
         return outputs;
     }
 
+    /**
+     * Coverts a bitmap to the byteBuffer of right dimension for the model's input
+     * @param image the bitmap image to be converted
+     * @return the converted bitmap to bytebuffer
+     */
     // Resize the given bitmap and convert it to a ByteBuffer
     private ByteBuffer convertBitmapToBuffer(Bitmap image) {
         int imgSize = 160;
@@ -75,6 +94,13 @@ public class FaceNetModel {
         return imageByteBuffer;
     }
 
+
+    /**
+     * Load FaceNet model from the assets
+     * @param assets assets containing the model
+     * @return MappedByteBuffer of the model, used to initialize an Interpreter
+     * @throws IOException
+     */
     private static MappedByteBuffer loadModelFile(AssetManager assets) throws IOException {
         AssetFileDescriptor fileDescriptor;
         fileDescriptor = assets.openFd("facenet.tflite");
@@ -88,73 +114,40 @@ public class FaceNetModel {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
-    // Crop the given bitmap with the given rect.
+    /**
+     * Crop the given bitmap with the given rect.
+     * @param source bitmap image to be cropped
+     * @param rect matrix used to crop
+     * @param angle angle if image needs to be rotated prior to cropping
+     * @return the cropped bitmap
+     * @throws BoundingBoxOutOfPictureException
+     */
     private Bitmap cropRectFromBitmap(Bitmap source, Rect rect , float angle ) throws BoundingBoxOutOfPictureException {
         Bitmap cropped;
         if ((rect.left+rect.width())>source.getWidth() || (rect.top+rect.height())>source.getHeight()) {
             throw new BoundingBoxOutOfPictureException("The face is partly out of the picture");
         }
         if ( angle != 0 ) {
-            Log.e("SIZE BITMAP : ", source.getWidth() + " " + source.getHeight());
-            Log.e("SIZE BITMAP : ", rect.left + " " + rect.top + " " + rect.width() + " " + rect.height());
             source = rotateBitmap( source, angle );
-            cropped = Bitmap.createBitmap(source,
-                    rect.left,
-                    rect.top,
-                    rect.width(),
-                    rect.height());
-        } else {
-            cropped = Bitmap.createBitmap(source,
-                    rect.left,
-                    rect.top,
-                    rect.width(),
-                    rect.height());
         }
+        cropped = Bitmap.createBitmap(source,
+                rect.left,
+                rect.top,
+                rect.width(),
+                rect.height());
         return cropped;
     }
 
+    /**
+     * Rotate a given bitmap
+     * @param source bitmap to be rotated
+     * @param angle angle of rotation
+     * @return the rotated bitma
+     */
     private Bitmap rotateBitmap( Bitmap source , Float angle) {
         Matrix matrix = new Matrix();
         matrix.postRotate( angle );
         return Bitmap.createBitmap(source, 0, 0, source.getWidth(), source.getHeight(), matrix , false );
     }
 
-
-    public void saveTempBitmap(Bitmap bitmap) {
-        if (isExternalStorageWritable()) {
-            saveImage(bitmap);
-        }else{
-            //prompt the user or do something
-        }
-    }
-
-    private void saveImage(Bitmap finalBitmap) {
-
-        String root = Environment.getExternalStorageDirectory().toString();
-        File myDir = new File(root + "/saved_images");
-        myDir.mkdirs();
-
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String fname = "Photo_"+ timeStamp +".jpg";
-
-        File file = new File(myDir, fname);
-        if (file.exists()) file.delete ();
-        try {
-            FileOutputStream out = new FileOutputStream(file);
-            finalBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-            out.flush();
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /* Checks if external storage is available for read and write */
-    public boolean isExternalStorageWritable() {
-        String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
-    }
 }
