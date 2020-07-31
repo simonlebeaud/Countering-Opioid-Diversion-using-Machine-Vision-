@@ -55,7 +55,7 @@ public class FaceNetModel {
                 convertBitmapToBuffer(
                         cropRectFromBitmap( image, faceBoundingBox, angle )
                 )
-        );
+        )[0];
 
     }
 
@@ -64,9 +64,9 @@ public class FaceNetModel {
      * @param inputs the image of the face converted to ByteBuffer
      * @return
      */
-    private float[] runFaceNet(ByteBuffer inputs){
+    private float[][] runFaceNet(ByteBuffer inputs){
         long t1 = System.currentTimeMillis();
-        float[] outputs = new float[128];
+        float[][] outputs = new float[1][128];
         interpreter.run(inputs, outputs);
         Log.e( "Performance" , "FaceNet Inference Speed in ms : " + (System.currentTimeMillis() - t1));
         return outputs;
