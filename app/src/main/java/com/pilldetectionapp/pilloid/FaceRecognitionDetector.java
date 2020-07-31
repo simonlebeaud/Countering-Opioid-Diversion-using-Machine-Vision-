@@ -119,7 +119,7 @@ public class FaceRecognitionDetector {
 
                         Log.e(TAG, String.valueOf(similarityScore));
 
-                        if (similarityScore > 0.85f) {
+                        if (similarityScore > 0.80f) {
                             Log.e(TAG, "recog success ");
                             recognitionSucceed = true;
                         }

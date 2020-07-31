@@ -120,18 +120,18 @@ public class FaceDetector {
                                         //
                                         for (FirebaseVisionFace face : faces) {
 
-                                            Rect Face = faces.get(0).getBoundingBox();
+                                            //Rect Face = faces.get(0).getBoundingBox();
+
+                                            count = count +1;
+                                            // We have detected minimum one face
+                                            setFace_Detected(true);
+
+                                            // We print in the logCat that we have detected one face
+                                            Log.e("Face Detector", "Detected");
 
                                             // We check if the face is entirely in the picture
-                                            if (!((Face.left+Face.width())>bitmap.getWidth() || (Face.top+Face.height())>bitmap.getHeight())) {
-                                                count = count +1;
-                                                // We have detected minimum one face
-                                                setFace_Detected(true);
-
-                                                // We print in the logCat that we have detected one face
-                                                Log.e("Face Detector", "Detected");
-                                            }
-                                        }
+                                            //if (!((Face.left+Face.width())>bitmap.getWidth() || (Face.top+Face.height())>bitmap.getHeight())) {
+                                            } 
                                         // We set the mouth position only for the first face detected
                                         if (count == 1) {
                                             Get_SetMouthPositionFromFirebaseVisionFace(faces.get(0));
