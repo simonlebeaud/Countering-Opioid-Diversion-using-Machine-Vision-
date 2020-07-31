@@ -33,12 +33,11 @@ public class Detector {
         this.pillDetector = new PillDetector();
         this.faceRecognitionDetector = new FaceRecognitionDetector(activity);
         try {
-            this.handDetector = new HandDetector(activity,
-                    activity.getAssets(),
-                    MODEL_FILENAME,
-                    LABELS_FILENAME,
-                    INPUT_SIZE,
-                    IS_QUANTIZED);
+            this.handDetector = new HandDetector(activity.getAssets(),
+                                    MODEL_FILENAME,
+                                    LABELS_FILENAME,
+                                    INPUT_SIZE,
+                                    IS_QUANTIZED);
         } catch (IOException e) {
             e.printStackTrace();
         }

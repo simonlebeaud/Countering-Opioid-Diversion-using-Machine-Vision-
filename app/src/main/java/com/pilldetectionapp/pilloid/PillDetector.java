@@ -8,36 +8,60 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+/**
+ * class to detect a pill in the image
+ */
 public class PillDetector {
     // Attributes
     private Boolean pill_detected;
     private float[] pill_position;
 
-    // Constructor
+    /**
+     * Constructor
+     */
     public PillDetector(){
         this.pill_detected = false;
         this.pill_position = new float[4];
     }
 
-    // Getters
+    /**
+     * get pill detected boolean
+     * @return true or false depending and the variables value
+     */
     public Boolean getPill_detected(){
         return this.pill_detected;
     }
 
+    /**
+     * get pill position
+     * @return table of positions
+     */
     public float[] getPill_position(){
         return this.pill_position;
     }
 
-    // Setters
+    /**
+     * Set the boolean pill detected
+     * @param result
+     */
     public void setPill_detected(Boolean result){
         this.pill_detected = result;
     }
 
+    /**
+     * Set pill's poisition attribute
+     * @param pos positions
+     */
     public void setPill_position(float[] pos){
         this.pill_position = pos;
     }
 
-    // Methods
+    /**
+     * Detetect the pill in a given image
+     * @param frame the givent frame
+     * @param mouth table of position of the mouth in the frame
+     * @return a black and whit image of the pill
+     */
     public Mat StartPillDetection(Mat frame, int[] mouth) {
 
         Mat hsv_image = new Mat();

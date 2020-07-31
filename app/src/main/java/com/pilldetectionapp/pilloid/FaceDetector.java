@@ -203,7 +203,7 @@ public class FaceDetector {
     }
 
     /**
-     * method to know if there is a face in the desired frame
+     * acknowledge if there is a face in the desired frame
      * @param frame frame to be analysed
      * @return true if a face is found
      */

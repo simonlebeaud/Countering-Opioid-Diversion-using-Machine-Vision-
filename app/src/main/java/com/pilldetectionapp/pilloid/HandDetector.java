@@ -31,14 +31,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-
+/**
+ * class to detect hand on a frame
+ */
 public class HandDetector {
     private static final String TAG = "HandDetector";
     private String modelFilename;
     private String labelFilename;
     private String label;
     private Interpreter handDetector;
-    private Activity activity;
     Boolean isDownloaded = false;
     private static final double threshold = 0.2;
     private int inputSize;
@@ -73,15 +74,21 @@ public class HandDetector {
 
     private Boolean hand_detected;
 
-
-    public HandDetector(Activity activity ,
-                        final AssetManager assetManager,
+    /**
+     * constructor
+     * @param assetManager assets containing the model
+     * @param modelFilename the model file name
+     * @param labelFilename the labels file name
+     * @param inputSize the input size
+     * @param isQuantized to know if the model is quantized
+     * @throws IOException
+     */
+    public HandDetector(final AssetManager assetManager,
                         final String modelFilename,
                         final String labelFilename,
                         final int inputSize,
                         final boolean isQuantized) throws IOException{
         this.hand_detected = false;
-        this.activity = activity;
         this.inputSize = inputSize;
         this.assetManager = assetManager;
 
@@ -135,7 +142,13 @@ public class HandDetector {
     }
 
 
-
+    /**
+     * Load model from file in the projects assets
+     * @param assets assets containing the model
+     * @param modelFilename the file name of the model
+     * @return ByteBuffer needed to initialize interpreter
+     * @throws IOException
+     */
     private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
         AssetFileDescriptor fileDescriptor = null;
         fileDescriptor = assets.openFd(modelFilename);
@@ -149,11 +162,18 @@ public class HandDetector {
         return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
+    /**
+     * getter on private boolean attribute hand_detected
+     * @return the value of the attribute
+     */
     public Boolean getHand_detected(){
         return this.hand_detected;
     }
 
-
+    /**
+     * Does hand detection on the hand and assign true to hand_detected attribute if hand is detected
+     * @param frame
+     */
     public void StartHandDetection(Mat frame) {
 
         Bitmap oribmp = bitmapFromMat(frame);
@@ -239,15 +259,27 @@ public class HandDetector {
         } else this.hand_detected = false;
     }
 
-    public Bitmap bitmapFromMat(Mat mRgba) {
-        Bitmap bitmap = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(mRgba, bitmap);
+    /**
+     * convert mat to bitmap
+     * @param image the image to be converted
+     * @return the converted bitmap
+     */
+    public Bitmap bitmapFromMat(Mat image) {
+        Bitmap bitmap = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
+        Utils.matToBitmap(image, bitmap);
         return bitmap;
     }
 
-    public Bitmap getResizedBitmap(Bitmap bm, int newWidth, int newHeight) {
-        int width = bm.getWidth();
-        int height = bm.getHeight();
+    /**
+     * Get the resized bitmap of a given bitmap
+     * @param bitmap Bitmap to be resized
+     * @param newWidth width of the resized bitmap
+     * @param newHeight height of the resized bitmap
+     * @return the resized bitmap
+     */
+    public Bitmap getResizedBitmap(Bitmap bitmap, int newWidth, int newHeight) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
         float scaleWidth = ((float) newWidth) / width;
         float scaleHeight = ((float) newHeight) / height;
         // CREATE A MATRIX FOR THE MANIPULATION
@@ -257,8 +289,8 @@ public class HandDetector {
 
         // "RECREATE" THE NEW BITMAP
         Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
+                bitmap, 0, 0, width, height, matrix, false);
+        bitmap.recycle();
         return resizedBitmap;
     }
 
