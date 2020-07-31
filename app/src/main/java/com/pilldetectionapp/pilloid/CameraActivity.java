@@ -368,7 +368,6 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     public void checkPersonsFaceIdentity(Mat frame) {
         rightPerson = false;
         if(!rightPerson) {
-            Boolean test = false;
             this.rightPerson = this.detector.getFaceRecognitionDetector().analyse(frame);
 
             if (this.rightPerson) ShowToast("Right Person !");
