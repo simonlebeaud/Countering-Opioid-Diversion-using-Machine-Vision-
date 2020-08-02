@@ -253,9 +253,9 @@ public class HandDetector {
                 count++;
                 }
         }
-        if (count > 2 ) {
+        if (count > 3 ) {
             this.hand_detected = true;
-            Log.e("Hand proba",String.valueOf(x));
+
         } else this.hand_detected = false;
     }
 

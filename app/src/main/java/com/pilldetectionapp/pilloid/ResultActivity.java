@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 public class ResultActivity extends AppCompatActivity {
@@ -51,7 +52,7 @@ public class ResultActivity extends AppCompatActivity {
         this.textDetection = (TextView) findViewById(R.id.TextDetectionResult);
         setText(textDetection,rightTextDetected);
 
-        this.faceDetection = (TextView) findViewById(R.id.TextDetectionResult);
+        this.faceDetection = (TextView) findViewById(R.id.FaceDetectionResult);
         setText(faceDetection,rightFaceDetected);
     }
 

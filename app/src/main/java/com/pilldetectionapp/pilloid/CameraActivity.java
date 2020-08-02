@@ -101,7 +101,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         frame = inputFrame.rgba();
 
         if ((counter % 30 == 0)&&(start_button_finished)) {
-            if( !rightPerson || recogCount < 6  ) {
+            if( !rightPerson || recogCount < 4  ) {
                 this.checkPersonsFaceIdentity(frame);
                 recogCount += 1;
             } else {
@@ -110,21 +110,21 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 // We process face detection on the frame
                 this.detector.getFaceDetector().StartFaceDetection(frame);
                 face_detected = this.detector.getFaceDetector().getFace_Detected();
+                // Debugging message
                 Log.e("Face detected ", face_detected.toString());
 
                 if (face_detected) {
+                    //  Debugging message
                     Log.e("Mouth detected ", this.detector.getFaceDetector().getMouth_detected().toString());
                     // We process hand detection on the frame
                     this.detector.getHandDetector().StartHandDetection(frame);
+                    //  Debugging message
                     Log.e("Hand detected", this.detector.getHandDetector().getHand_detected().toString());
 
                     if (this.detector.getFaceDetector().getMouth_detected()) {
 
                         // If we detect a mouth we try to detect a pill on it
                         this.detector.getPillDetector().StartPillDetection(frame, this.detector.getFaceDetector().getMouth_Position());
-
-                        // Test the Text detection
-                        //if (this.detector.getPillDetector().getPill_detected()) this.detector.getTextDetector().StartTextDetection(frame);
 
                     } else this.detector.getPillDetector().setPill_detected(false);
 
@@ -356,8 +356,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 intent.putExtra("StepFourResult",good_finished);
                 intent.putExtra("TextDetectionResult",rightTextDetected);
                 intent.putExtra("FaceVerificationResult",rightPerson);
-                Log.e("Text detection Result ", String.valueOf(rightTextDetected));
-                // add verification result ...
+                // We launch the result activity
                 startActivity(intent);
             }
 
