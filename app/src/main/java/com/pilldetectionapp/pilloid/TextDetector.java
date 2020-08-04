@@ -13,7 +13,6 @@ import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 import com.google.firebase.ml.vision.text.FirebaseVisionText;
 import com.google.firebase.ml.vision.text.FirebaseVisionTextRecognizer;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 /**
@@ -25,11 +24,13 @@ public class TextDetector {
     private String[] text = new String[5];
     private Boolean textDetectionResult;
     private int pos;
+    private Utils utils;
 
     /**
      * constructor
      */
     public TextDetector(){
+        this.utils = new Utils();
         for(int i =0;i<5;i++){
             this.text[i] = "";
         }
@@ -74,7 +75,7 @@ public class TextDetector {
         for (int i = 0; i<5; i++) {
             this.pos = i;
             // Creation of the firebase image
-            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmapFromMat(frame[i]));
+            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(utils.bitmapFromMat(frame[i]));
 
             FirebaseVisionTextRecognizer detector = FirebaseVision.getInstance()
                     .getOnDeviceTextRecognizer();
@@ -92,7 +93,7 @@ public class TextDetector {
 
                                     // We print a message in the LogCat (debugging)
                                     Log.e("Text detection ", getText(pos));
-                                    Log.e("Text detection Result Text", getTextDetectionResult().toString());
+                                    Log.e("Text detection Result", getTextDetectionResult().toString());
 
                                 }
                             })
@@ -108,15 +109,4 @@ public class TextDetector {
 
     }
 
-    /**
-     * Method allowing to transform our frame into bitmap
-     * @param image mat to be transformed
-     * @return converted bitmap
-     */
-    public static Bitmap bitmapFromMat(Mat image) {
-        Bitmap bitmap = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(image, bitmap);
-
-        return bitmap;
-    }
 }

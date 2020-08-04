@@ -101,7 +101,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         frame = inputFrame.rgba();
 
         if ((counter % 30 == 0)&&(start_button_finished)) {
-            if( !rightPerson || recogCount < 4  ) {
+            if( !rightPerson || recogCount < 3  ) {
                 this.checkPersonsFaceIdentity(frame);
                 recogCount += 1;
             } else {

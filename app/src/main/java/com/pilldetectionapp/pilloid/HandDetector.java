@@ -1,40 +1,28 @@
 package com.pilldetectionapp.pilloid;
 
-import android.app.Activity;
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.graphics.RectF;
 import android.os.Trace;
-import android.util.Log;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint2f;
-import org.opencv.core.Point;
 import org.tensorflow.lite.Interpreter;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * class to detect hand on a frame
  */
 public class HandDetector {
+    private Utils utils;
     private static final String TAG = "HandDetector";
     private String modelFilename;
     private String labelFilename;
@@ -88,6 +76,7 @@ public class HandDetector {
                         final String labelFilename,
                         final int inputSize,
                         final boolean isQuantized) throws IOException{
+        this.utils = new Utils();
         this.hand_detected = false;
         this.inputSize = inputSize;
         this.assetManager = assetManager;
@@ -106,7 +95,7 @@ public class HandDetector {
         this.inputSize = inputSize;
 
         try {
-            this.handDetector = new Interpreter(loadModelFile(assetManager, modelFilename));
+            this.handDetector = new Interpreter(utils.loadModelFile(assetManager, modelFilename));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -141,27 +130,6 @@ public class HandDetector {
 //        }
     }
 
-
-    /**
-     * Load model from file in the projects assets
-     * @param assets assets containing the model
-     * @param modelFilename the file name of the model
-     * @return ByteBuffer needed to initialize interpreter
-     * @throws IOException
-     */
-    private static MappedByteBuffer loadModelFile(AssetManager assets, String modelFilename) throws IOException {
-        AssetFileDescriptor fileDescriptor = null;
-        fileDescriptor = assets.openFd(modelFilename);
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-
-        FileChannel fileChannel = inputStream.getChannel();
-
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
-    }
-
     /**
      * getter on private boolean attribute hand_detected
      * @return the value of the attribute
@@ -176,7 +144,7 @@ public class HandDetector {
      */
     public void StartHandDetection(Mat frame) {
 
-        Bitmap oribmp = bitmapFromMat(frame);
+        Bitmap oribmp = utils.bitmapFromMat(frame);
         Bitmap bitmap = Bitmap.createBitmap(INPUT_SIZE, INPUT_SIZE, Bitmap.Config.ARGB_8888);
 
         bitmap = getResizedBitmap(oribmp, 256, 256);
@@ -257,17 +225,6 @@ public class HandDetector {
             this.hand_detected = true;
 
         } else this.hand_detected = false;
-    }
-
-    /**
-     * convert mat to bitmap
-     * @param image the image to be converted
-     * @return the converted bitmap
-     */
-    public Bitmap bitmapFromMat(Mat image) {
-        Bitmap bitmap = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(image, bitmap);
-        return bitmap;
     }
 
     /**

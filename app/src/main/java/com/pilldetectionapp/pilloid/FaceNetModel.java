@@ -1,27 +1,17 @@
 package com.pilldetectionapp.pilloid;
 
-import android.content.res.AssetFileDescriptor;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.Rect;
-import android.os.Environment;
 import android.util.Log;
 
 import com.pilldetectionapp.pilloid.exceptions.BoundingBoxOutOfPictureException;
 
 import org.tensorflow.lite.Interpreter;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class FaceNetModel {
 
@@ -32,8 +22,9 @@ public class FaceNetModel {
      * @param assetManager assets, including the FaceNet model used for face recognition
      */
     public FaceNetModel(AssetManager assetManager) {
+        Utils utils = new Utils();
         try {
-            this.interpreter = new Interpreter(loadModelFile(assetManager));
+            this.interpreter = new Interpreter(utils.loadModelFile(assetManager,"facenet.tflite"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -92,26 +83,6 @@ public class FaceNetModel {
             }
         }
         return imageByteBuffer;
-    }
-
-
-    /**
-     * Load FaceNet model from the assets
-     * @param assets assets containing the model
-     * @return MappedByteBuffer of the model, used to initialize an Interpreter
-     * @throws IOException
-     */
-    private static MappedByteBuffer loadModelFile(AssetManager assets) throws IOException {
-        AssetFileDescriptor fileDescriptor;
-        fileDescriptor = assets.openFd("facenet.tflite");
-        FileInputStream inputStream = new FileInputStream(fileDescriptor.getFileDescriptor());
-
-        FileChannel fileChannel = inputStream.getChannel();
-
-        long startOffset = fileDescriptor.getStartOffset();
-        long declaredLength = fileDescriptor.getDeclaredLength();
-
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength);
     }
 
     /**

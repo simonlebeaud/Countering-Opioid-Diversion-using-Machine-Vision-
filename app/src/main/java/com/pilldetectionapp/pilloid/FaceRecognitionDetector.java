@@ -1,17 +1,11 @@
 package com.pilldetectionapp.pilloid;
 
-import android.Manifest;
 import android.app.Activity;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Build;
-import android.os.CountDownTimer;
-import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -23,7 +17,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.ml.vision.FirebaseVision;
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
-import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata;
 import com.google.firebase.ml.vision.face.FirebaseVisionFace;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions;
@@ -31,7 +24,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.pilldetectionapp.pilloid.exceptions.BoundingBoxOutOfPictureException;
 
-import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 
 import java.net.URI;
@@ -53,7 +45,7 @@ public class FaceRecognitionDetector {
     private Bitmap bitmap;
     private Bitmap savedImage;
     private FirebaseUser user;
-    private URI uri;
+    private Utils utils;
 
     /**
      * constructor of the face recognition detector
@@ -61,6 +53,7 @@ public class FaceRecognitionDetector {
      */
     public FaceRecognitionDetector(final Activity activity) {
         this.activity = activity;
+        this.utils = new Utils();
         this.getUsersImage();
         // Creation of the setting of the detector, see the documentation if you want more details
         FirebaseVisionFaceDetectorOptions settings =
@@ -83,7 +76,7 @@ public class FaceRecognitionDetector {
     public boolean analyse(Mat frame) {
         boolean recognitionSucceed = false;
 
-        this.bitmap = bitmapFromMat(frame);
+        this.bitmap = utils.bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
         List<FirebaseVisionFace> facesInSaved;
@@ -158,20 +151,6 @@ public class FaceRecognitionDetector {
         double euclideanDist = Math.sqrt(normS) * Math.sqrt(normT);
         return dotProduct / euclideanDist;
     }
-
-
-    /**
-     * Convert Mat to Bitmap
-     * @param image matrix to be converted
-     * @return the converted bitmap
-     */
-    public static Bitmap bitmapFromMat(Mat image) {
-        Bitmap bitmap = Bitmap.createBitmap(image.cols(), image.rows(), Bitmap.Config.ARGB_8888);
-        Utils.matToBitmap(image, bitmap);
-
-        return bitmap;
-    }
-
 
     /**
      * Each user has a profile picture
