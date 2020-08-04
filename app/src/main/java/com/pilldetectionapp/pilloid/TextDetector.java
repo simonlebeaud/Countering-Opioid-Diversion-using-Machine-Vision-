@@ -85,7 +85,7 @@ public class TextDetector {
                                 @Override
                                 public void onSuccess(FirebaseVisionText firebaseVisionText) {
                                     // Task completed successfully
-                                    setText(pos,firebaseVisionText.getText());
+                                    setText(pos,firebaseVisionText.getText().toUpperCase());
 
                                     // if that's the good text we put the result to True
                                     if (getText(pos).equals(pillText)) setTextDetectionResult(true);
