@@ -39,12 +39,8 @@ public class FaceRecognitionDetector {
     private FirebaseVisionFaceDetector face_detector;
 
     private Activity activity;
-    private FaceNetModel model;
-    private float[] imageData;
     private Rect foundFace = null;
-    private Bitmap bitmap;
     private Bitmap savedImage;
-    private FirebaseUser user;
     private Utils utils;
 
     /**
@@ -76,7 +72,7 @@ public class FaceRecognitionDetector {
     public boolean analyse(Mat frame) {
         boolean recognitionSucceed = false;
 
-        this.bitmap = utils.bitmapFromMat(frame);
+        Bitmap bitmap = utils.bitmapFromMat(frame);
 
         List<FirebaseVisionFace> facesInInput = null;
         List<FirebaseVisionFace> facesInSaved;
@@ -92,23 +88,23 @@ public class FaceRecognitionDetector {
             try{
                 this.foundFace = facesInInput.get(0).getBoundingBox();
                 Log.e(TAG, "face found on new image");
-                this.model = new FaceNetModel(activity.getAssets());
+                FaceNetModel model = new FaceNetModel(activity.getAssets());
 
-                this.imageData = new float[128];
+                float[] imageData = new float[128];
 
                 FirebaseVisionImage reference = FirebaseVisionImage.fromBitmap(savedImage);
 
                 facesInSaved = Tasks.await(face_detector.detectInImage(reference));
 
                 Log.e(TAG, "face found on saved image");
-                imageData = this.model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 0f);
+                imageData = model.getFaceEmbedding(savedImage, facesInSaved.get(0).getBoundingBox(), 0f);
                 if (FaceRecognitionDetector.this.foundFace != null) {
-                    float[] subject = model.getFaceEmbedding(this.bitmap, this.foundFace, 0f);
+                    float[] subject = model.getFaceEmbedding(bitmap, this.foundFace, 0f);
                     double similarityScore = -1f;
                     String similarityScoreName = "";
 
                     if (imageData != null) {
-                        similarityScore = cosineSimilarity( subject, imageData );
+                        similarityScore = cosineSimilarity( subject, imageData);
 
                         Log.e(TAG, String.valueOf(similarityScore));
 
@@ -158,7 +154,7 @@ public class FaceRecognitionDetector {
      */
     private void getUsersImage(){
         long TWO_MEGABYTE = 1024*1024*2;
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference gsReference = storage.getReferenceFromUrl("gs://pilloid.appspot.com/profileImages/" + user.getUid() + ".jpeg");
         gsReference.getBytes(TWO_MEGABYTE)

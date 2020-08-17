@@ -14,7 +14,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,41 +23,21 @@ import java.util.Map;
 public class HandDetector {
     private Utils utils;
     private static final String TAG = "HandDetector";
-    private String modelFilename;
-    private String labelFilename;
+    private static final int INPUT_SIZE = 256;
     private String label;
     private Interpreter handDetector;
-    Boolean isDownloaded = false;
-    private static final double threshold = 0.2;
-    private int inputSize;
     private ByteBuffer imgData;
     private AssetManager assetManager;
 
-    private static float[][] anchors = new float[2944][4];
     private float[][][] outputReg = new float[1][2944][18];
     private float[][][] outputClf = new float[1][2944][1];
 
     private int[] intValues;
     // Only return this many results.
-    private static final int NUM_DETECTIONS = 1;
-    // Float model
-    private static final float IMAGE_MEAN = 128.0f;
-    private static final float IMAGE_STD = 128.0f;
     // Number of threads in the java app
     private static final int NUM_THREADS = 4;
-    private boolean isModelQuantized;
 
-    private float[][][] outputLocations;
-    // outputClasses: array of shape [Batchsize, NUM_DETECTIONS]
-    // contains the classes of detected boxes
-    private float[][] outputClasses;
-    // outputScores: array of shape [Batchsize, NUM_DETECTIONS]
-    // contains the scores of detected boxes
-    private float[][] outputScores;
-    // numDetections: array of shape [Batchsize]
-    // contains the number of detected boxes
-    private float[] numDetections;
-    private static final int INPUT_SIZE = 256;
+
 
     private Boolean hand_detected;
 
@@ -67,18 +46,12 @@ public class HandDetector {
      * @param assetManager assets containing the model
      * @param modelFilename the model file name
      * @param labelFilename the labels file name
-     * @param inputSize the input size
-     * @param isQuantized to know if the model is quantized
-     * @throws IOException
      */
     public HandDetector(final AssetManager assetManager,
                         final String modelFilename,
-                        final String labelFilename,
-                        final int inputSize,
-                        final boolean isQuantized) throws IOException{
+                        final String labelFilename) throws IOException{
         this.utils = new Utils();
         this.hand_detected = false;
-        this.inputSize = inputSize;
         this.assetManager = assetManager;
 
 
@@ -92,7 +65,6 @@ public class HandDetector {
 
         br.close();
 
-        this.inputSize = inputSize;
 
         try {
             this.handDetector = new Interpreter(utils.loadModelFile(assetManager, modelFilename));
@@ -100,34 +72,15 @@ public class HandDetector {
             throw new RuntimeException(e);
         }
 
-        this.isModelQuantized = isQuantized;
-
         // Pre-allocate buffers.
-        int numBytesPerChannel;
-        if (isQuantized) {
-            numBytesPerChannel = 1; // Quantized
-        } else {
-            numBytesPerChannel = 4; // Floating point
-        }
-        this.imgData = ByteBuffer.allocateDirect(this.inputSize * this.inputSize * 3 * numBytesPerChannel);
+        int numBytesPerChannel = 4; // Floating point
+
+        this.imgData = ByteBuffer.allocateDirect(INPUT_SIZE * INPUT_SIZE * 3 * numBytesPerChannel);
         this.imgData.order(ByteOrder.nativeOrder());
-        this.intValues = new int[this.inputSize * this.inputSize];
+        this.intValues = new int[INPUT_SIZE * INPUT_SIZE];
 
         this.handDetector.setNumThreads(NUM_THREADS);
-        this.outputLocations = new float[1][NUM_DETECTIONS][4];
-        this.outputClasses = new float[1][NUM_DETECTIONS];
-        this.outputScores = new float[1][NUM_DETECTIONS];
-        this.numDetections = new float[1];
 
-//        // read anchors.csv
-//        try (Scanner scanner = new Scanner(assetManager.open("anchors.csv"));) {
-//            int x = 0;
-//            while (scanner.hasNextLine()) {
-////        records.add(getRecordFromLine());
-//                String[] cols = scanner.nextLine().split(",");
-//                anchors[x++] = new float[]{Float.valueOf(cols[0]) , Float.valueOf(cols[1]) , Float.valueOf(cols[2]), Float.valueOf(cols[3])};
-//            }
-//        }
     }
 
     /**
@@ -158,33 +111,18 @@ public class HandDetector {
         bitmap.getPixels(intValues, 0, bitmap.getWidth(), 0, 0, bitmap.getWidth(), bitmap.getHeight());
         // put the image in imgData
         imgData.rewind();
-        for (int i = 0; i < inputSize; ++i) {
-            for (int j = 0; j < inputSize; ++j) {
-                int pixelValue = intValues[i * inputSize + j];
-                if (isModelQuantized) {
-                    // Quantized model
-                    imgData.put((byte) ((pixelValue >> 16) & 0xFF));
-                    imgData.put((byte) ((pixelValue >> 8) & 0xFF));
-                    imgData.put((byte) (pixelValue & 0xFF));
-                } else { // Float model
-//          imgData.putFloat((((pixelValue >> 16) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-//          imgData.putFloat((((pixelValue >> 8) & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
-//          imgData.putFloat(((pixelValue & 0xFF) - IMAGE_MEAN) / IMAGE_STD);
+        for (int i = 0; i < INPUT_SIZE; ++i) {
+            for (int j = 0; j < INPUT_SIZE; ++j) {
+                int pixelValue = intValues[i * INPUT_SIZE + j];
+                imgData.putFloat(((((pixelValue >> 16) & 0xFF) / 255f) - .5f) * 2);
+                imgData.putFloat(((((pixelValue >> 8) & 0xFF) / 255f) - .5f) * 2);
+                imgData.putFloat((((pixelValue & 0xFF) / 255f) - .5f) * 2);
 
-                    imgData.putFloat(((((pixelValue >> 16) & 0xFF) / 255f) - .5f) * 2);
-                    imgData.putFloat(((((pixelValue >> 8) & 0xFF) / 255f) - .5f) * 2);
-                    imgData.putFloat((((pixelValue & 0xFF) / 255f) - .5f) * 2);
-
-                }
             }
         }
         Trace.endSection(); // preprocessBitmap;
 
         Trace.beginSection("feed");
-        outputLocations = new float[1][NUM_DETECTIONS][4];
-        outputClasses = new float[1][NUM_DETECTIONS];
-        outputScores = new float[1][NUM_DETECTIONS];
-        numDetections = new float[1];
 
         Object[] inputArray = {imgData};
         Map<Integer, Object> outputMap = new HashMap<>();
@@ -198,17 +136,10 @@ public class HandDetector {
         handDetector.runForMultipleInputsOutputs(inputArray, outputMap);
         Trace.endSection();
 
-        // Show the best detections.
-        // after scaling them back to the input size.
-
-        ArrayList<float[]> candidate_detect_array = new ArrayList<float[]>();
 
         float[] clf = new float[outputClf[0].length];
 
-        int max_idx = 0;
-        double max_suggestion = 0;
         int count = 0;
-        int clf_max_idx = 0;
         float x =0;
 
         // finding the best result of detecting hand

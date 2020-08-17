@@ -57,7 +57,7 @@ public class PillDetector {
     }
 
     /**
-     * Detetect the pill in a given image
+     * Detect the pill in a given image
      * @param frame the givent frame
      * @param mouth table of position of the mouth in the frame
      * @return a black and whit image of the pill

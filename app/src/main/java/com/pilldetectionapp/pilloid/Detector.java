@@ -17,8 +17,6 @@ public class Detector {
     private FaceRecognitionDetector faceRecognitionDetector;
 
     // Constants for the handdetector
-    private static final int INPUT_SIZE = 256;
-    private static final boolean IS_QUANTIZED = false;
     private static final String MODEL_FILENAME = "palm_detection.tflite";
     private static final String LABELS_FILENAME = "file:///android_asset/palm_detection_labelmap.txt";
 
@@ -35,9 +33,7 @@ public class Detector {
         try {
             this.handDetector = new HandDetector(activity.getAssets(),
                                     MODEL_FILENAME,
-                                    LABELS_FILENAME,
-                                    INPUT_SIZE,
-                                    IS_QUANTIZED);
+                                    LABELS_FILENAME);
         } catch (IOException e) {
             e.printStackTrace();
         }
