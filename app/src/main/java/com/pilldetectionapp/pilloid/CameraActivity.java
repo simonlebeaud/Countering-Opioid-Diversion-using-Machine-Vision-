@@ -53,7 +53,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
     private Toast toast;
 
     private TextView message_view,counter_view;
-
+    private Button DispenseButton;
+    private Boolean buttonAction;
     private String pill_text;
 
     private Boolean rightPerson = false;
@@ -70,7 +71,8 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         cameraBridgeViewBase.setCameraIndex(1);
         cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         cameraBridgeViewBase.setCvCameraViewListener(this);
-
+        DispenseButton = (Button) findViewById(R.id.DispenseButton);
+        DispenseButton.setVisibility(View.GONE);
         initialize_variable();
 
 
@@ -105,6 +107,18 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 this.checkPersonsFaceIdentity(frame);
                 recogCount += 1;
             } else {
+                buttonAction = false;
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+
+                        DispenseButton.setVisibility(View.VISIBLE);
+
+                    }
+                });
+
+                if (buttonAction) {
                 Log.e("Frame took", "frame picked");
 
                 // We process face detection on the frame
@@ -132,6 +146,7 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
                 } else {
                     no_face_detected++;
                     ShowToast("No Face Detected");
+                }
                 }
             }
         }
@@ -403,5 +418,11 @@ public class CameraActivity extends AppCompatActivity implements CameraBridgeVie
         Button start_button;
         start_button = (Button) findViewById(R.id.StartButton);
         start_button.setVisibility(view.GONE);
+    }
+
+    public void Dispense(View view){
+        // Put the code wich allow to dispense the pill by sending a bluetooth message
+        DispenseButton.setVisibility(View.GONE);
+        buttonAction = true;
     }
 }
